@@ -13,7 +13,9 @@ class Application {
     final api = TelegramApi(appKey);
 
     final port = Platform.environment['PORT'];
-    await server.startServer(port: port == null ? 80 : int.parse(port));
+    print("Environment: ${Platform.environment}");
+    print("port: $port");
+    await server.startServer(port: port == null ? 8080 : int.parse(port));
 
     await api.setupWebHook("https://epictale-telegram.herokuapp.com/$appKey");
 
