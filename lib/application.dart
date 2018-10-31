@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:epictale_telegram/api/telegram_api.dart';
 import 'package:epictale_telegram/server.dart';
@@ -6,12 +7,13 @@ import 'package:epictale_telegram/server.dart';
 const String appKey = "663762224:AAEatW0mX8svEAZdgGpMOdGJZYXKIasONNc";
 
 class Application {
-
   Future init() async {
+
     final server = Server();
     final api = TelegramApi(appKey);
 
-    await server.startServer();
+    final port = Platform.environment['PORT'];
+    await server.startServer(port: port == null ? 80 : int.parse(port));
 
     await api.setupWebHook("https://epictale-telegram.herokuapp.com/$appKey");
 
