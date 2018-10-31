@@ -9,7 +9,7 @@ packages:
     source: hosted
     version: "0.32.6"
   aqueduct:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: aqueduct
       url: "https://pub.dartlang.org"
