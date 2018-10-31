@@ -1,3 +1,5 @@
+import 'package:epictale_telegram/webhook_controller.dart';
+
 import 'epictale_telegram.dart';
 
 const APP_TOKEN = "663762224:AAEatW0mX8svEAZdgGpMOdGJZYXKIasONNc";
@@ -28,13 +30,9 @@ class EpictaleTelegramChannel extends ApplicationChannel {
   Controller get entryPoint {
     final router = Router();
 
-    // Prefer to use `link` instead of `linkFunction`.
-    // See: https://aqueduct.io/docs/http/request_controller/
     router
-      .route("/example")
-      .linkFunction((request) async {
-        return Response.ok({"key": "value"});
-      });
+      .route(APP_TOKEN)
+      .link(() => WebhookController());
 
     return router;
   }
