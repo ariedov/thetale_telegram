@@ -8,7 +8,7 @@ class WebhookController extends ResourceController {
   Future<Response> webhookRequest() async {
     
     return Response.ok({
-
+      "text": "Hello"
     });
   }
 }
