@@ -14,9 +14,6 @@ class Server {
 
   Stream<dynamic> listen() async* {
     await for (HttpRequest request in _server) {
-      print("Uri: ${request.requestedUri}");
-      print("Url: ${request.length}");
-
       if (request.method == "POST" && request.contentLength > 0) {
         yield await request.transform(utf8.decoder).join();
       }
