@@ -38,4 +38,10 @@ void main() {
     
     expect(update.updateId, 622582740);
   });
+
+  test("Send message response converter", () {
+    const payload = """{"ok":true,"result":{"message_id":17,"from":{"id":663762224,"is_bot":true,"first_name":"EpicTaleBot","username":"EpicTaleBot"},"chat":{"id":123152703,"first_name":"David","last_name":"Leibovych","username":"ariedov","type":"private"},"date":1541109647,"text":"I have received your message!"}}""";
+    final message = convertMessageAction(json.decode(payload));
+    expect(message.messageId, 17);
+  });
 }

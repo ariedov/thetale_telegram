@@ -7,6 +7,11 @@ Update convertUpdate(dynamic json) {
   );
 }
 
+Message convertMessageAction(dynamic json) {
+  final message = json["result"];
+  return convertMessage(message);
+}
+
 Message convertMessage(dynamic json) {
   return Message(
     json["message_id"] as int,
@@ -56,7 +61,7 @@ List<MessageEntity> convertMessageEntities(dynamic json) {
   if (json == null) {
     return [];
   }
-  
+
   return (json as List).map((item) {
     return MessageEntity(
       item["offset"] as int,
