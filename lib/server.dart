@@ -12,7 +12,7 @@ class Server {
     );
   }
 
-  Future listen(RequestHandler handler) async {
+  Stream<dynamic> listen() async* {
     await for (HttpRequest request in _server) {
       print("Uri: ${request.requestedUri}");
       print("Url: ${request.length}");
@@ -21,8 +21,7 @@ class Server {
         final decoder = json.fuse(const Utf8Codec()).decoder;
         final data = await decoder.bind(request).single;
 
-        print("DATA: $data");
-        handler(data);
+        yield data;
       }
 
       final response = request.response;

@@ -20,10 +20,10 @@ class Application {
     final roomFactory = RoomFactory();
     final roomManager = RoomManager(roomFactory);
 
-    await server.listen((data) {
+    await for (dynamic data in server.listen()) {
       final update = convertUpdate(data);
       final room = roomManager.getRoom(update.message.chat.id);
       room.processUpdate(update);
-    });
+    }
   }
 }
