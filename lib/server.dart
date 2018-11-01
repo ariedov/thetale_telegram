@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 class Server {
@@ -13,6 +14,12 @@ class Server {
 
   Future listen(createResponse(String method, String path)) async {
     await for (HttpRequest request in _server) {
+      print("Uri: ${request.requestedUri}");
+    
+      final decoder = json.fuse(const Utf8Codec()).decoder;
+      final data = await decoder.bind(request).single;
+
+      print("DATA: $data");
       final response = request.response;
       response.headers.contentType = ContentType("application", "json");
 
