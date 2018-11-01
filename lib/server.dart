@@ -18,11 +18,7 @@ class Server {
       print("Url: ${request.length}");
 
       if (request.method == "POST" && request.contentLength > 0) {
-        final broadcastRequest = request.asBroadcastStream();
-        final decoder = json.fuse(const Utf8Codec()).decoder;
-        final data = await decoder.bind(broadcastRequest).single;
-
-        yield data;
+        yield await request.transform(utf8.decoder).join();
       }
 
       final response = request.response;
