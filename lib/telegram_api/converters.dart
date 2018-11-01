@@ -1,4 +1,4 @@
-import 'package:epictale_telegram/api/models.dart';
+import 'package:epictale_telegram/telegram_api/models.dart';
 
 Update convertUpdate(dynamic json) {
   return Update(

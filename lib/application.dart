@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:epictale_telegram/api/telegram_api.dart';
+import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:epictale_telegram/server.dart';
 
 const String appKey = "663762224:AAEatW0mX8svEAZdgGpMOdGJZYXKIasONNc";
