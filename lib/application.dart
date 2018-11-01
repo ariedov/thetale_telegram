@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:epictale_telegram/room.dart';
@@ -20,8 +21,8 @@ class Application {
     final roomFactory = RoomFactory();
     final roomManager = RoomManager(roomFactory);
 
-    await for (dynamic data in server.listen()) {
-      final update = convertUpdate(data);
+    await for (String data in server.listen()) {
+      final update = convertUpdate(json.decode(data));
       final room = roomManager.getRoom(update.message.chat.id);
       room.processUpdate(update);
     }

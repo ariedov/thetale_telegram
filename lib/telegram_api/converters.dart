@@ -53,6 +53,10 @@ ChatType _readChatType(String chatType) {
 }
 
 List<MessageEntity> convertMessageEntities(dynamic json) {
+  if (json == null) {
+    return [];
+  }
+  
   return (json as List).map((item) {
     return MessageEntity(
       item["offset"] as int,
