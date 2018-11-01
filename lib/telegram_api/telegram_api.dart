@@ -21,6 +21,7 @@ class TelegramApi {
         "https://api.telegram.org/bot$token/sendMessage",
         body: {"chat_id": chatId.toString(), "text": message});
 
+    print("Send message body: ${response.body}");
     return convertMessage(json.decode(response.body));
   }
 }
