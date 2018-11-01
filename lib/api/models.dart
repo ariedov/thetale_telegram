@@ -44,6 +44,8 @@ class MessageEntity {
   final int offset;
   final int length;
   final MessageEntityType type;
+
+  MessageEntity(this.offset, this.length, this.type);
 }
 
 enum MessageEntityType {
