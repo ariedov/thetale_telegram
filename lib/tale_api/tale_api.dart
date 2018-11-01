@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/tale_api/converters.dart';
 import 'package:epictale_telegram/tale_api/models.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +13,9 @@ const String applicationDescription = "Телеграм бот для игры �
 class TaleApi {
 
   final String apiUrl = "https://the-tale.org/";
+  final UserManager userManager;
+
+  TaleApi(this.userManager);
 
   Future<ThirdPartyLink> auth() async {
     const method = "/accounts/third-party/tokens/api/request-authorisation";
@@ -20,8 +24,10 @@ class TaleApi {
       "application_info": applicationInfo,
       "application_description": applicationDescription
     });
+    
+    await userManager.saveUserToken(response.headers["Cookie"]);
 
     final bodyJson = json.decode(response.body);
-    return convertThirdPartyLink(bodyJson);
+    return convertResponse(bodyJson, convertThirdPartyLink).data;
   }
 }

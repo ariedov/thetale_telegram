@@ -12,7 +12,7 @@ class Server {
     );
   }
 
-  Future listen(createResponse(String method, String path)) async {
+  Future listen(RequestHandler handler) async {
     await for (HttpRequest request in _server) {
       print("Uri: ${request.requestedUri}");
       print("Url: ${request.length}");
@@ -22,17 +22,16 @@ class Server {
         final data = await decoder.bind(request).single;
 
         print("DATA: $data");
+        handler(data);
       }
 
       final response = request.response;
-      response.headers.contentType = ContentType("application", "json");
-
-      response.write(createResponse(
-        request.method,
-        request.requestedUri.path,
-      ));
+      response.statusCode = 200;
+      response.write(true);
 
       await response.close();
     }
   }
 }
+
+typedef RequestHandler = void Function(dynamic data);

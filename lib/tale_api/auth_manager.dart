@@ -1,23 +1,22 @@
 import 'dart:async';
 
+import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/tale_api/tale_api.dart';
 
 class AuthManager {
   final TaleApi api;
-  AuthManager(this.api);
+  final UserManager userManager;
 
-  Timer _timer;
+  final Map<String, Timer> _userTimerMap = {};
 
-  Future startAuth() async {
-    _timer?.cancel();
+  AuthManager(this.api, this.userManager);
+
+  Future startAuth(String username) async {
+    _userTimerMap[username]?.cancel();
     await api.auth();
 
-    final startTime = DateTime.now().millisecondsSinceEpoch;
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      final currentTime = DateTime.now().millisecondsSinceEpoch;
-      final secondsDifference = (currentTime - startTime) / 1000;
-
-      if (secondsDifference >= 600) {
+    _userTimerMap[username] = Timer.periodic(Duration(seconds: 1), (timer) async {
+      if (timer.tick >= 600) {
         timer.cancel();
         return;
       }
