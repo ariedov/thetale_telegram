@@ -15,11 +15,15 @@ class Server {
   Future listen(createResponse(String method, String path)) async {
     await for (HttpRequest request in _server) {
       print("Uri: ${request.requestedUri}");
-    
-      final decoder = json.fuse(const Utf8Codec()).decoder;
-      final data = await decoder.bind(request).single;
+      print("Url: ${request.length}");
 
-      print("DATA: $data");
+      if (request.method == "POST" && request.contentLength > 0) {
+        final decoder = json.fuse(const Utf8Codec()).decoder;
+        final data = await decoder.bind(request).single;
+
+        print("DATA: $data");
+      }
+
       final response = request.response;
       response.headers.contentType = ContentType("application", "json");
 
