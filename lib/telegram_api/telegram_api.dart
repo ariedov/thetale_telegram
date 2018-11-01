@@ -19,7 +19,7 @@ class TelegramApi {
   Future<Message> sendMessage(String message) async {
     final response = await http.post(
         "https://api.telegram.org/bot$token/sendMessage",
-        body: {"chat_id": chatId, "text": message});
+        body: {"chat_id": chatId.toString(), "text": message});
 
     return convertMessage(json.decode(response.body));
   }
