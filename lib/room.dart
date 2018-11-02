@@ -38,7 +38,12 @@ class Room {
   Room(this._chatId, this._taleApi, this._telegramApi);
 
   /// This method will call both telegram and tale api
-  void processUpdate(Update update) {
-    _telegramApi.sendMessage("I have received your message!");
+  void processUpdate(Update update) async {
+    if (update.message.from.isBot) {
+      return;
+    }
+
+    final link = await _taleApi.auth();
+    await _telegramApi.sendMessage("Чтобы авторизоваться - перейди по ссылке ${link.authorizationPage}");
   }
 }
