@@ -27,18 +27,14 @@ class TaleApi {
     print("Headers: ${response.headers}");
     print("Body: ${response.body}");
 
-    final processedResponse =
-        _processResponse<ApiInfo>(response.body, convertApiInfo);
     await _processHeader(response.headers);
-
-    return processedResponse;
+    return _processResponse<ApiInfo>(response.body, convertApiInfo);
   }
 
-  Future _processHeader(Map<String, String> headers) async {   
-
-    final setCookie = headers["Set-Cookie"];
+  Future _processHeader(Map<String, String> headers) async {
+    final setCookie = headers["set-cookie"];
     print("Set Cookie: $setCookie");
-    
+
     final cookies = setCookie.split("; ");
     final csrfToken = cookies.firstWhere((text) => text.contains("csrftoken"));
     final sessionid = cookies.firstWhere((text) => text.contains("sessionid"),
