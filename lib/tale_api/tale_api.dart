@@ -5,6 +5,8 @@ import 'package:epictale_telegram/tale_api/converters.dart';
 import 'package:epictale_telegram/tale_api/models.dart';
 import 'package:http/http.dart' as http;
 
+const String appVersion = "0.0.1";
+
 const String applicationId = "epic_tale_telegram";
 const String applicationName = "Сказка в Телеграмме";
 const String applicationInfo = "Телеграм бот для игры в сказку";
@@ -18,20 +20,27 @@ class TaleApi {
 
   Future<ApiInfo> apiInfo() async {
     const method = "/api/info";
-    final response = await http
-        .post("$apiUrl/$method?api_version=1.0&api_client=$applicationId");
+    final response = await http.post(
+        "$apiUrl/$method?api_version=1.9&api_client=$applicationId-$appVersion");
 
-    final setCookie = response.headers["Set-Cookie"];
+    final processedResponse =
+        _processResponse<ApiInfo>(response.body, convertApiInfo);
+    await _processHeader(response.headers);
+
+    return processedResponse;
+  }
+
+  Future _processHeader(Map<String, String> headers) async {
+    print("Headers: $headers");
+    
+    final setCookie = headers["Set-Cookie"];
     final cookies = setCookie.split("; ");
     final csrfToken = cookies.firstWhere((text) => text.contains("csrftoken"));
     final sessionid = cookies.firstWhere((text) => text.contains("sessionid"),
         orElse: () => null);
-
-    print("csrftoken: $csrfToken. sessionId: $sessionid");
-
     await userManager.saveUserSession(SessionInfo(csrfToken, sessionid));
 
-    return _processResponse<ApiInfo>(response.body, convertApiInfo);
+    print("csrftoken: $csrfToken. sessionId: $sessionid");
   }
 
   Future<ThirdPartyLink> auth() async {
