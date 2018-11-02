@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:epictale_telegram/tale_api/converters.dart';
+import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -50,18 +51,10 @@ void main() {
         sessionid=csxqqjj7cyiy9b3mukhzor9z9we9twks; expires=Fri, 16-Nov-2018 16:15:22 GMT; HttpOnly; Max-Age=1209600; Path=/; Secure,csrftoken=PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk; expires=Fri, 01-Nov-2019 16:15:22 GMT; HttpOnly; Max-Age=31449600; Path=/; Secure
         }""";
 
-    final sessionRegex = RegExp(r"sessionid=(\w+);");
+    final session = readSessionInfo(payload);
 
-    final sessionMatch = sessionRegex.firstMatch(payload);
-    final session = sessionMatch.group(1);
-
-    final csrfRegex = RegExp(r"csrftoken=(\w+);");
-
-    final csrfMatch = csrfRegex.firstMatch(payload);
-    final csrf = csrfMatch.group(1);
-
-    expect(session, "csxqqjj7cyiy9b3mukhzor9z9we9twks");
-    expect(csrf, "PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk");
+    expect(session.sessionId, "csxqqjj7cyiy9b3mukhzor9z9we9twks");
+    expect(session.csrfToken, "PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk");
 
   });
 }

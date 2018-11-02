@@ -34,14 +34,11 @@ class TaleApi {
   Future _processHeader(Map<String, String> headers) async {
     final setCookie = headers["set-cookie"];
     print("Set Cookie: $setCookie");
+    
+    final session = readSessionInfo(setCookie);
+    print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
 
-    final cookies = setCookie.split("; ");
-    final csrfToken = cookies.firstWhere((text) => text.contains("csrftoken"));
-    final sessionid = cookies.firstWhere((text) => text.contains("sessionid"),
-        orElse: () => null);
-    await userManager.saveUserSession(SessionInfo(csrfToken, sessionid));
-
-    print("csrftoken: $csrfToken. sessionId: $sessionid");
+    await userManager.saveUserSession(session);
   }
 
   Future<ThirdPartyLink> auth() async {
@@ -74,4 +71,18 @@ class TaleApi {
     }
     return taleResponse.data;
   }
+}
+
+SessionInfo readSessionInfo(String cookie) {
+    final sessionRegex = RegExp(r"sessionid=(\w+);");
+
+    final sessionMatch = sessionRegex.firstMatch(cookie);
+    final session = sessionMatch.group(1);
+
+    final csrfRegex = RegExp(r"csrftoken=(\w+);");
+
+    final csrfMatch = csrfRegex.firstMatch(cookie);
+    final csrf = csrfMatch.group(1);
+
+    return SessionInfo(session, csrf);
 }
