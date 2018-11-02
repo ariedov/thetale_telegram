@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:epictale_telegram/tale_api/converters.dart';
 import 'package:test/test.dart';
@@ -46,18 +47,21 @@ void main() {
   test("test headers read", () {
     const payload =
         """
-        {
-          connection: keep-alive, 
-          set-cookie: 
-            sessionid=jx2zxg63gfljvwutfyuz1k593kxousrw; expires=Fri, 16-Nov-2018 15:59:39 GMT; HttpOnly; Max-Age=1209600; Path=/; Secure,
-            csrftoken=HI94mrbsQxRlkiLveKr64dqhzIl2ld6KrXldhY895wi5YRXbRfiSDMITJv5Q8qVt; expires=Fri, 01-Nov-2019 15:59:39 GMT; HttpOnly; Max-Age=31449600; Path=/; Secure, 
-            date: Fri, 02 Nov 2018 15:59:39 GMT, 
-            transfer-encoding: chunked, 
-            content-encoding: gzip, 
-            vary: Accept-Encoding,Cookie, 
-            content-type: application/json; charset=utf-8, 
-            x-frame-options: DENY, 
-            server: nginx/1.10.3 (Ubuntu)
+        sessionid=csxqqjj7cyiy9b3mukhzor9z9we9twks; expires=Fri, 16-Nov-2018 16:15:22 GMT; HttpOnly; Max-Age=1209600; Path=/; Secure,csrftoken=PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk; expires=Fri, 01-Nov-2019 16:15:22 GMT; HttpOnly; Max-Age=31449600; Path=/; Secure
         }""";
+
+    final sessionRegex = RegExp(r"sessionid=(\w+);");
+
+    final sessionMatch = sessionRegex.firstMatch(payload);
+    final session = sessionMatch.group(1);
+
+    final csrfRegex = RegExp(r"csrftoken=(\w+);");
+
+    final csrfMatch = csrfRegex.firstMatch(payload);
+    final csrf = csrfMatch.group(1);
+
+    expect(session, "csxqqjj7cyiy9b3mukhzor9z9we9twks");
+    expect(csrf, "PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk");
+
   });
 }
