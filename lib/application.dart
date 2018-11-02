@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:epictale_telegram/room.dart';
 import 'package:epictale_telegram/telegram_api/converters.dart';
+import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:epictale_telegram/server.dart';
 
@@ -25,7 +26,12 @@ class Application {
       print(data);
       final update = convertUpdate(json.decode(data));
       final room = roomManager.getRoom(update.message.chat.id);
-      room.processUpdate(update);
+
+      processRoom(room, update);
     }
+  }
+
+  void processRoom(Room room, Update update) async {
+    await room.processUpdate(update);
   }
 }

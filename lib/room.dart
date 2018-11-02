@@ -37,7 +37,7 @@ class Room {
   Room(this._chatId, this._taleApi, this._telegramApi);
 
   /// This method will call both telegram and tale api
-  void processUpdate(Update update) async {
+  Future processUpdate(Update update) async {
     if (update.message.from.isBot) {
       return;
     }
@@ -45,6 +45,7 @@ class Room {
     try {
       await _processMessage(update.message.text);
     } catch (e) {
+      print(e);
       if (e is String) {
         await trySendMessage(e);
       }
@@ -54,6 +55,8 @@ class Room {
   Future _processMessage(String message) async {
     switch (message) {
       case "/start":
+        await trySendMessage("Привет, хранитель!");
+
         final info = await _taleApi.apiInfo();
 
         await trySendMessage("Версия игры ${info.gameVersion}. Сейчас попробую тебя авторизовать.");
