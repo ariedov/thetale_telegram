@@ -23,6 +23,9 @@ class TaleApi {
     final response = await http.post(
         "$apiUrl/$method?api_version=1.9&api_client=$applicationId-$appVersion");
 
+    print("Headers: ${response.headers}");
+    print("Body: ${response.body}");
+
     final processedResponse =
         _processResponse<ApiInfo>(response.body, convertApiInfo);
     await _processHeader(response.headers);
@@ -30,9 +33,7 @@ class TaleApi {
     return processedResponse;
   }
 
-  Future _processHeader(Map<String, String> headers) async {
-    print("Headers: $headers");
-    
+  Future _processHeader(Map<String, String> headers) async {    
     final setCookie = headers["Set-Cookie"];
     final cookies = setCookie.split("; ");
     final csrfToken = cookies.firstWhere((text) => text.contains("csrftoken"));
