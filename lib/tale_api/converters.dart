@@ -14,4 +14,14 @@ ThirdPartyLink convertThirdPartyLink(dynamic json) {
   );
 }
 
+ApiInfo convertApiInfo(dynamic json) {
+  return ApiInfo(
+    json["static_content"] as String,
+    json["game_version"] as String,
+    json["turn_delta"] as int,
+    json["account_id"] as int,
+    json["account_name"] as String
+  );
+}
+
 typedef Converter<T> = T Function(dynamic json);

@@ -9,6 +9,17 @@ class Response<T> {
   bool get isError => status == "error";
 }
 
+class ApiInfo {
+  final String staticContent;
+  final String gameVersion;
+  final int turnDelta;
+  final int accountId;
+  final String accountName;
+
+  ApiInfo(this.staticContent, this.gameVersion, this.turnDelta, this.accountId,
+      this.accountName);
+}
+
 class ThirdPartyLink {
   final String authorizationPage;
 

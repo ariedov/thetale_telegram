@@ -11,24 +11,54 @@ const String applicationInfo = "Телеграм бот для игры в ск�
 const String applicationDescription = "Телеграм бот для игры в сказку";
 
 class TaleApi {
-
   final String apiUrl = "https://the-tale.org/";
   final UserManager userManager;
 
   TaleApi(this.userManager);
 
+  Future<ApiInfo> apiInfo() async {
+    const method = "/api/info";
+    final response = await http
+        .post("$apiUrl/$method?api_version=1.0&api_client=$applicationId");
+
+    final setCookie = response.headers["Set-Cookie"];
+    final cookies = setCookie.split("; ");
+    final csrfToken = cookies.firstWhere((text) => text.contains("csrftoken"));
+    final sessionid = cookies.firstWhere((text) => text.contains("sessionid"),
+        orElse: () => null);
+
+    print("csrftoken: $csrfToken. sessionId: $sessionid");
+
+    await userManager.saveUserSession(SessionInfo(csrfToken, sessionid));
+
+    return _processResponse<ApiInfo>(response.body, convertApiInfo);
+  }
+
   Future<ThirdPartyLink> auth() async {
     const method = "/accounts/third-party/tokens/api/request-authorisation";
-    final response = await http.post("$apiUrl$method?api_version=1.0&api_client=$applicationId", body: {
-      "application_name": applicationName,
-      "application_info": applicationInfo,
-      "application_description": applicationDescription
-    });
-    
-    await userManager.saveUserToken(response.headers["Cookie"]);
+    final session = await userManager.readUserSession();
 
-    final bodyJson = json.decode(response.body);
-    final taleResponse = convertResponse(bodyJson, convertThirdPartyLink);
+    final response = await http.post(
+        "$apiUrl$method?api_version=1.0&api_client=$applicationId",
+        headers: {
+          "Referer": apiUrl,
+          "X-CSRFToken": session.csrfToken,
+          "sessionid": session.sessionId
+        },
+        body: {
+          "application_name": applicationName,
+          "application_info": applicationInfo,
+          "application_description": applicationDescription
+        });
+
+    return _processResponse<ThirdPartyLink>(
+        response.body, convertThirdPartyLink);
+  }
+
+  T _processResponse<T>(String body, T converter(dynamic json)) {
+    final bodyJson = json.decode(body);
+    final taleResponse = convertResponse(bodyJson, converter);
+
     if (taleResponse.isError) {
       throw taleResponse.error ?? "Что-то пошло не так";
     }

@@ -43,8 +43,7 @@ class Room {
     }
 
     try {
-      final link = await _taleApi.auth();
-      await trySendMessage("Чтобы авторизоваться - перейди по ссылке ${link.authorizationPage}");
+      await _processMessage(update.message.text);
     } catch (e) {
       if (e is String) {
         await trySendMessage(e);
@@ -52,11 +51,24 @@ class Room {
     }
   }
 
+  Future _processMessage(String message) async {
+    switch (message) {
+      case "/start":
+        final info = await _taleApi.apiInfo();
+
+        await trySendMessage("Версия игры ${info.gameVersion}. Сейчас попробую тебя авторизовать.");
+
+        final link = await _taleApi.auth();
+        await trySendMessage(
+            "Чтобы авторизоваться - перейди по ссылке ${link.authorizationPage}");
+        break;
+    }
+  }
+
   Future<Message> trySendMessage(String message) async {
     try {
       return await _telegramApi.sendMessage(message);
-    } 
-    catch (e) {
+    } catch (e) {
       print("Failed to send message");
     }
     return null;
