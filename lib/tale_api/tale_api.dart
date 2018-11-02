@@ -33,7 +33,7 @@ class TaleApi {
   Future _processHeader(Map<String, String> headers) async {
     final setCookie = headers["set-cookie"];
     print("Set Cookie: $setCookie");
-    
+
     final session = readSessionInfo(setCookie);
     print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
 
@@ -42,16 +42,10 @@ class TaleApi {
 
   Future<ThirdPartyLink> auth() async {
     const method = "/accounts/third-party/tokens/api/request-authorisation";
-    final session = await userManager.readUserSession();
 
     final response = await http.post(
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
-        headers: {
-          "Referer": apiUrl,
-          "sessionid": session.sessionId,
-          "X-CSRFToken": session.csrfToken,
-          "Cookie": "csrftoken=${session.csrfToken}",
-        },
+        headers: await _createHeaders(),
         body: {
           "application_name": applicationName,
           "application_info": applicationInfo,
@@ -60,6 +54,27 @@ class TaleApi {
 
     return _processResponse<ThirdPartyLink>(
         response.body, convertThirdPartyLink);
+  }
+
+  Future<ThirdPartyStatus> authStatus() async {
+    const method = "/accounts/third-party/tokens/api/authorisation-state";
+
+    final response = await http.get(
+        "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
+        headers: await _createHeaders());
+
+    await _processHeader(response.headers);
+    return _processResponse(response.body, convertThirdPartyStatus);
+  }
+
+  Future<Map<String, String>> _createHeaders() async {
+    final session = await userManager.readUserSession();
+    return {
+      "Referer": apiUrl,
+      "X-CSRFToken": session.csrfToken,
+      "Cookie":
+          "csrftoken=${session.csrfToken}; sessionid=${session.sessionId}",
+    };
   }
 
   T _processResponse<T>(String body, T converter(dynamic json)) {
@@ -74,15 +89,15 @@ class TaleApi {
 }
 
 SessionInfo readSessionInfo(String cookie) {
-    final sessionRegex = RegExp(r"sessionid=(\w+);");
+  final sessionRegex = RegExp(r"sessionid=(\w+);");
 
-    final sessionMatch = sessionRegex.firstMatch(cookie);
-    final session = sessionMatch.group(1);
+  final sessionMatch = sessionRegex.firstMatch(cookie);
+  final session = sessionMatch.group(1);
 
-    final csrfRegex = RegExp(r"csrftoken=(\w+);");
+  final csrfRegex = RegExp(r"csrftoken=(\w+);");
 
-    final csrfMatch = csrfRegex.firstMatch(cookie);
-    final csrf = csrfMatch.group(1);
+  final csrfMatch = csrfRegex.firstMatch(cookie);
+  final csrf = csrfMatch.group(1);
 
-    return SessionInfo(session, csrf);
+  return SessionInfo(session, csrf);
 }

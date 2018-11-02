@@ -14,6 +14,16 @@ ThirdPartyLink convertThirdPartyLink(dynamic json) {
   );
 }
 
+ThirdPartyStatus convertThirdPartyStatus(dynamic json) {
+  return ThirdPartyStatus(
+    json["next_url"] as String,
+    json["account_id"] as int,
+    json["account_name"] as String,
+    json["session_expire_at"] as int,
+    json["state"] as int
+  );
+}
+
 ApiInfo convertApiInfo(dynamic json) {
   return ApiInfo(
     json["static_content"] as String,

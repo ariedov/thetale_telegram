@@ -60,6 +60,24 @@ void main() {
         "/accounts/third-party/tokens/41b21f95-8b4f-41f0-acef-e5ca06edcaf0");
   });
 
+  test("test auth status", () {
+    const payload = """{
+      "status": "ok",
+      "data": {
+          "account_name": null,
+          "account_id": null,
+          "state": 0,
+          "session_expire_at": 1542405235
+      }
+    }""";
+
+    final payloadJson = json.decode(payload);
+    final response = convertResponse(payloadJson, convertThirdPartyStatus);
+
+    expect(response.isError, false);
+    expect(response.data.expireAt, 1542405235);
+  });
+
   test("test headers read", () {
     const payload = """
         sessionid=csxqqjj7cyiy9b3mukhzor9z9we9twks; expires=Fri, 16-Nov-2018 16:15:22 GMT; HttpOnly; Max-Age=1209600; Path=/; Secure,csrftoken=PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk; expires=Fri, 01-Nov-2019 16:15:22 GMT; HttpOnly; Max-Age=31449600; Path=/; Secure""";
