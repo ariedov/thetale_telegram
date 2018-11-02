@@ -49,6 +49,7 @@ class MessageEntity {
 }
 
 enum MessageEntityType {
+  mention,
   hashtag,
   cashtag,
   botCommand,

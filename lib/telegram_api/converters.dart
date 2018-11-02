@@ -73,6 +73,8 @@ List<MessageEntity> convertMessageEntities(dynamic json) {
 
 MessageEntityType _readMessageEntityType(String name) {
   switch (name) {
+    case "mention":
+      return MessageEntityType.mention;
     case "hashtag":
       return MessageEntityType.hashtag;
     case "cashtag":

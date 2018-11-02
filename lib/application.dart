@@ -22,6 +22,7 @@ class Application {
     final roomManager = RoomManager(roomFactory);
 
     await for (String data in server.listen()) {
+      print(data);
       final update = convertUpdate(json.decode(data));
       final room = roomManager.getRoom(update.message.chat.id);
       room.processUpdate(update);
