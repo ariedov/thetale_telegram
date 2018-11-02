@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/tale_api/converters.dart';
 import 'package:epictale_telegram/tale_api/models.dart';
@@ -33,8 +34,11 @@ class TaleApi {
     return processedResponse;
   }
 
-  Future _processHeader(Map<String, String> headers) async {    
+  Future _processHeader(Map<String, String> headers) async {   
+
     final setCookie = headers["Set-Cookie"];
+    print("Set Cookie: $setCookie");
+    
     final cookies = setCookie.split("; ");
     final csrfToken = cookies.firstWhere((text) => text.contains("csrftoken"));
     final sessionid = cookies.firstWhere((text) => text.contains("sessionid"),

@@ -42,4 +42,22 @@ void main() {
     expect(response.status, "ok");
     expect(response.data.gameVersion, "v0.3.27.1");
   });
+
+  test("test headers read", () {
+    const payload =
+        """
+        {
+          connection: keep-alive, 
+          set-cookie: 
+            sessionid=jx2zxg63gfljvwutfyuz1k593kxousrw; expires=Fri, 16-Nov-2018 15:59:39 GMT; HttpOnly; Max-Age=1209600; Path=/; Secure,
+            csrftoken=HI94mrbsQxRlkiLveKr64dqhzIl2ld6KrXldhY895wi5YRXbRfiSDMITJv5Q8qVt; expires=Fri, 01-Nov-2019 15:59:39 GMT; HttpOnly; Max-Age=31449600; Path=/; Secure, 
+            date: Fri, 02 Nov 2018 15:59:39 GMT, 
+            transfer-encoding: chunked, 
+            content-encoding: gzip, 
+            vary: Accept-Encoding,Cookie, 
+            content-type: application/json; charset=utf-8, 
+            x-frame-options: DENY, 
+            server: nginx/1.10.3 (Ubuntu)
+        }""";
+  });
 }
