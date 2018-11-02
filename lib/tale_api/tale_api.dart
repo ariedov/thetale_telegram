@@ -28,6 +28,10 @@ class TaleApi {
     await userManager.saveUserToken(response.headers["Cookie"]);
 
     final bodyJson = json.decode(response.body);
-    return convertResponse(bodyJson, convertThirdPartyLink).data;
+    final taleResponse = convertResponse(bodyJson, convertThirdPartyLink);
+    if (taleResponse.isError) {
+      throw taleResponse.error ?? "Что-то пошло не так";
+    }
+    return taleResponse.data;
   }
 }

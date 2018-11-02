@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 
 class RoomFactory {
-
   Room createRoom(int chatId) {
     final userManager = MemoryUserManager(chatId);
     final taleApi = TaleApi(userManager);
@@ -15,7 +16,6 @@ class RoomFactory {
 }
 
 class RoomManager {
-
   final Map<int, Room> _rooms = {};
   final RoomFactory _roomFactory;
 
@@ -30,7 +30,6 @@ class RoomManager {
 }
 
 class Room {
-
   final int _chatId;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
@@ -43,7 +42,23 @@ class Room {
       return;
     }
 
-    final link = await _taleApi.auth();
-    await _telegramApi.sendMessage("Чтобы авторизоваться - перейди по ссылке ${link.authorizationPage}");
+    try {
+      final link = await _taleApi.auth();
+      await trySendMessage("Чтобы авторизоваться - перейди по ссылке ${link.authorizationPage}");
+    } catch (e) {
+      if (e is String) {
+        await trySendMessage(e);
+      }
+    }
+  }
+
+  Future<Message> trySendMessage(String message) async {
+    try {
+      return await _telegramApi.sendMessage(message);
+    } 
+    catch (e) {
+      print("Failed to send message");
+    }
+    return null;
   }
 }
