@@ -63,7 +63,7 @@ class Room {
 
         final link = await _taleApi.auth();
         await trySendMessage(
-            "Чтобы авторизоваться - перейди по ссылке ${link.authorizationPage}");
+            "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}");
         break;
     }
   }

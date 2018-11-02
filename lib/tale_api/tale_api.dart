@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/tale_api/converters.dart';
 import 'package:epictale_telegram/tale_api/models.dart';
@@ -14,7 +13,7 @@ const String applicationInfo = "Телеграм бот для игры в ск�
 const String applicationDescription = "Телеграм бот для игры в сказку";
 
 class TaleApi {
-  final String apiUrl = "https://the-tale.org/";
+  final String apiUrl = "https://the-tale.org";
   final UserManager userManager;
 
   TaleApi(this.userManager);
@@ -46,16 +45,17 @@ class TaleApi {
     final session = await userManager.readUserSession();
 
     final response = await http.post(
-        "$apiUrl$method?api_version=1.0&api_client=$applicationId",
+        "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
         headers: {
           "Referer": apiUrl,
+          "sessionid": session.sessionId,
           "X-CSRFToken": session.csrfToken,
-          "sessionid": session.sessionId
+          "Cookie": "csrftoken=${session.csrfToken}",
         },
         body: {
           "application_name": applicationName,
           "application_info": applicationInfo,
-          "application_description": applicationDescription
+          "application_description": applicationDescription,
         });
 
     return _processResponse<ThirdPartyLink>(
