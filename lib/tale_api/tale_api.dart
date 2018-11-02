@@ -21,7 +21,7 @@ class TaleApi {
 
   Future<ApiInfo> apiInfo() async {
     const method = "/api/info";
-    final response = await http.post(
+    final response = await http.get(
         "$apiUrl/$method?api_version=1.9&api_client=$applicationId-$appVersion");
 
     print("Headers: ${response.headers}");
