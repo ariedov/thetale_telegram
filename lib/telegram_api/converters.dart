@@ -66,7 +66,7 @@ List<MessageEntity> convertMessageEntities(dynamic json) {
     return MessageEntity(
       item["offset"] as int,
       item["length"] as int,
-      _readMessageEntityType(json["type"] as String),
+      _readMessageEntityType(item["type"] as String),
     );
   }).toList();
 }
