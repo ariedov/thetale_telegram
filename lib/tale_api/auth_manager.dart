@@ -19,11 +19,10 @@ class AuthManager {
         return;
       }
 
-      await _checkAuth();
+      final status = await _api.authStatus();
+      if (status.isAccepted) {
+        timer.cancel();
+      }
     });
-  }
-
-  Future _checkAuth() async {
-    _api.authStatus();
   }
 }
