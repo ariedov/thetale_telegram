@@ -63,3 +63,16 @@ enum MessageEntityType {
   textLink,
   textMention
 }
+
+class ReplyKeyboard {
+
+  final List<KeyboardButton> keyboard;
+
+  ReplyKeyboard(this.keyboard);
+}
+
+class KeyboardButton {
+  final String text;
+
+  KeyboardButton(this.text);
+}

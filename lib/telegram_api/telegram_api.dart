@@ -16,12 +16,19 @@ class TelegramApi {
 
   TelegramApi(this.chatId);
 
-  Future<Message> sendMessage(String message) async {
-    final response = await http.post(
-        "https://api.telegram.org/bot$token/sendMessage",
-        body: {"chat_id": chatId.toString(), "text": message});
+  Future<Message> sendMessage(String message, {ReplyKeyboard keyboard}) async {
+    final response = await http
+        .post("https://api.telegram.org/bot$token/sendMessage", body: {
+      "chat_id": chatId.toString(),
+      "text": message,
+      "reply_markup": keyboard != null ? "\{\"keyboard\": [[${_buildReplyKeyboardString(keyboard)}]]}" : "",
+    });
 
     print("Send message body: ${response.body}");
     return convertMessageAction(json.decode(response.body));
+  }
+
+  String _buildReplyKeyboardString(ReplyKeyboard keyboard) {
+    return keyboard.keyboard.map((item) => "\"${item.text}\"").join(", ");
   }
 }

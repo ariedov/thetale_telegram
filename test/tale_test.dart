@@ -67,7 +67,7 @@ void main() {
           "account_name": null,
           "account_id": null,
           "state": 0,
-          "session_expire_at": 1542405235
+          "session_expire_at": 1542405235.0
       }
     }""";
 

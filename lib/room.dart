@@ -47,7 +47,7 @@ class Room {
     } catch (e) {
       print(e);
       if (e is String) {
-        await trySendMessage(e);
+        await _trySendMessage(e);
       }
     }
   }
@@ -55,22 +55,35 @@ class Room {
   Future _processMessage(String message) async {
     switch (message) {
       case "/start":
-        await trySendMessage("Привет, хранитель!");
+        await _trySendMessage("Привет, хранитель!");
 
         final info = await _taleApi.apiInfo();
 
-        await trySendMessage("Версия игры ${info.gameVersion}. Сейчас попробую тебя авторизовать.");
+        await _trySendMessage(
+            "Версия игры ${info.gameVersion}. Сейчас попробую тебя авторизовать.");
 
         final link = await _taleApi.auth();
-        await trySendMessage(
-            "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}");
+        await _trySendMessage(
+          "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",
+          keyboard: ReplyKeyboard([KeyboardButton("/auth")]),
+        );
+        break;
+      case "/auth":
+        final status = await _taleApi.authStatus();
+
+        if (status.isAccepted) {
+          await _trySendMessage("Ну привет, ${status.accountName}.");
+        } else {
+          await _trySendMessage("Тебе стоит попытаться еще раз.");
+        }
         break;
     }
   }
 
-  Future<Message> trySendMessage(String message) async {
+  Future<Message> _trySendMessage(String message,
+      {ReplyKeyboard keyboard}) async {
     try {
-      return await _telegramApi.sendMessage(message);
+      return await _telegramApi.sendMessage(message, keyboard: keyboard);
     } catch (e) {
       print("Failed to send message");
     }

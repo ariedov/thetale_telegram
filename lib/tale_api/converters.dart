@@ -19,7 +19,7 @@ ThirdPartyStatus convertThirdPartyStatus(dynamic json) {
     json["next_url"] as String,
     json["account_id"] as int,
     json["account_name"] as String,
-    json["session_expire_at"] as int,
+    json["session_expire_at"] as double,
     json["state"] as int
   );
 }

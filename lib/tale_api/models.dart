@@ -30,7 +30,7 @@ class ThirdPartyStatus {
   final String url;
   final int accountId;
   final String accountName;
-  final int expireAt;
+  final double expireAt;
   final int state;
 
   ThirdPartyStatus(
