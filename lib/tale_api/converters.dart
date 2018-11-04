@@ -35,7 +35,7 @@ GameInfo convertGameInfo(dynamic json) {
     json["mode"] as String,
     convertTurn(json["turn"]),
     json["game_state"] as int,
-    json["map_version"] as int,
+    json["map_version"] as String,
     convertAccount(json["account"]),
     convertAccount(json["enemy"]),
   );
@@ -47,10 +47,14 @@ Turn convertTurn(dynamic json) {
 }
 
 Account convertAccount(dynamic json) {
+  if (json == null) {
+    return null;
+  }
+  
   return Account(
       json["new_messages"] as int,
       json["id"] as int,
-      json["last_visit"] as int,
+      json["last_visit"] as double,
       json["is_own"] as bool,
       json["is_old"] as bool,
       convertHero(json["hero"]),
@@ -64,8 +68,8 @@ Hero convertHero(dynamic json) {
     convertCompanion(json["companion"]),
     convertBase(json["base"]),
     convertSecondary(json["secondary"]),
-    json["diary"] as String,
-    json["messages"] as List<List<dynamic>>,
+    json["diary"] as int,
+    json["messages"] as List<dynamic>,
   );
 }
 
@@ -100,8 +104,8 @@ Base convertBase(dynamic json) {
 
 Secondary convertSecondary(dynamic json) {
   return Secondary(
-    json["max_bag_size"] as int,
-    json["power"] as List<int>,
+    json["max_bag_size"] as double,
+    json["power"] as List<dynamic>,
     json["move_speed"] as double,
     json["loot_items_count"] as int,
     json["initiative"] as double,

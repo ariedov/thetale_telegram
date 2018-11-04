@@ -75,6 +75,9 @@ class Room {
 
         if (status.isAccepted) {
           await _trySendMessage("Ну привет, ${status.accountName}.");
+          
+          final gameInfo = await _taleApi.gameInfo();
+          await _trySendMessage("${gameInfo.account.hero.base.name}, уже заждался.");
         } else {
           await _trySendMessage("Тебе стоит попытаться еще раз.");
         }

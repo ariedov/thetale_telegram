@@ -43,7 +43,7 @@ class GameInfo {
   final String mode;
   final Turn turn;
   final int gameState;
-  final int mapVersion;
+  final String mapVersion;
   final Account account;
   final Account enemy;
 
@@ -61,7 +61,7 @@ class Turn {
 class Account {
   final int newMessages;
   final int id;
-  final int lastVisit;
+  final double lastVisit;
   final bool isOwn;
   final bool isOld;
   final Hero hero;
@@ -77,8 +77,8 @@ class Hero {
   final Companion companion;
   final Base base;
   final Secondary secondary;
-  final String diary;
-  final List<List<dynamic>> messages;
+  final int diary;
+  final List<dynamic> messages;
 
   Hero(this.patchTurn, this.companion, this.base, this.secondary, this.diary, this.messages);
 }
@@ -113,8 +113,8 @@ class Base {
 }
 
 class Secondary {
-  final int maxBagSize;
-  final List<int> power;
+  final double maxBagSize;
+  final List<dynamic> power;
   final double moveSpeed;
   final int lootItemsCount;
   final double initiative;

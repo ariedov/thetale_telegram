@@ -67,6 +67,15 @@ class TaleApi {
     return _processResponse(response.body, convertThirdPartyStatus);
   }
 
+  Future<GameInfo> gameInfo() async {
+    const method = "/game/api/info";
+    final response = await http.get(
+        "$apiUrl/$method?api_version=1.9&api_client=$applicationId-$appVersion",
+        headers: await _createHeaders());
+
+    return _processResponse(response.body, convertGameInfo);
+  }
+
   Future<Map<String, String>> _createHeaders() async {
     final session = await userManager.readUserSession();
     return {
