@@ -92,12 +92,18 @@ SessionInfo readSessionInfo(String cookie) {
   final sessionRegex = RegExp(r"sessionid=(\w+);");
 
   final sessionMatch = sessionRegex.firstMatch(cookie);
-  final session = sessionMatch.group(1);
+  String session;
+  if (sessionMatch != null) {
+    session = sessionMatch.group(1);
+  }
 
   final csrfRegex = RegExp(r"csrftoken=(\w+);");
 
   final csrfMatch = csrfRegex.firstMatch(cookie);
-  final csrf = csrfMatch.group(1);
+  String csrf;
+  if (csrfMatch != null) {
+    csrf = csrfMatch.group(1);
+  }
 
   return SessionInfo(session, csrf);
 }

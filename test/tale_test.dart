@@ -88,4 +88,25 @@ void main() {
     expect(session.csrfToken,
         "PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk");
   });
+
+  test("test session headers read", () {
+    const payload = """
+        sessionid=csxqqjj7cyiy9b3mukhzor9z9we9twks; expires=Fri, 16-Nov-2018 16:15:22 GMT; HttpOnly; Max-Age=1209600; Path=/; Secure,""";
+
+    final session = readSessionInfo(payload);
+
+    expect(session.sessionId, "csxqqjj7cyiy9b3mukhzor9z9we9twks");
+    expect(session.csrfToken, null);
+  });
+
+  test("test csrf headers read", () {
+    const payload = """
+        csrftoken=PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk; expires=Fri, 01-Nov-2019 16:15:22 GMT; HttpOnly; Max-Age=31449600; Path=/; Secure""";
+
+    final session = readSessionInfo(payload);
+
+    expect(session.sessionId, null);
+    expect(session.csrfToken,
+        "PVw6ZDIEt2UfcxsWwtdAES9Mwlq7FH7bxoyJMw1YlIj7wc3WhB0rKt6aRhzOkrOk");
+  });
 }
