@@ -65,7 +65,9 @@ class Room {
         final link = await _taleApi.auth();
         await _trySendMessage(
           "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",
-          keyboard: ReplyKeyboard([KeyboardButton("/auth")]),
+          keyboard: ReplyKeyboard([
+            ["/auth"]
+          ]),
         );
         break;
       case "/auth":

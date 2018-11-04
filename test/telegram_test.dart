@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:epictale_telegram/telegram_api/converters.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
+import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import "package:test/test.dart";
 
 void main() {
@@ -79,5 +80,14 @@ void main() {
         """{"ok":true,"result":{"message_id":17,"from":{"id":663762224,"is_bot":true,"first_name":"EpicTaleBot","username":"EpicTaleBot"},"chat":{"id":123152703,"first_name":"David","last_name":"Leibovych","username":"ariedov","type":"private"},"date":1541109647,"text":"I have received your message!"}}""";
     final message = convertMessageAction(json.decode(payload));
     expect(message.messageId, 17);
+  });
+
+  test("Keyboard convert", () {
+    final keyboard = ReplyKeyboard([[
+      "text"
+    ]]);
+
+    final encoded = encodeKeyboard(keyboard);
+    expect(encoded, "{\"keyboard\":[[\"text\"]],\"resize_keyboard\":true}");
   });
 }

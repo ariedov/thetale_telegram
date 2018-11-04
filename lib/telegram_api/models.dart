@@ -66,13 +66,8 @@ enum MessageEntityType {
 
 class ReplyKeyboard {
 
-  final List<KeyboardButton> keyboard;
+  final List<List<String>> keyboard;
+  final bool resizeKeyboard = true;
 
   ReplyKeyboard(this.keyboard);
-}
-
-class KeyboardButton {
-  final String text;
-
-  KeyboardButton(this.text);
 }
