@@ -50,7 +50,7 @@ Account convertAccount(dynamic json) {
   if (json == null) {
     return null;
   }
-  
+
   return Account(
       json["new_messages"] as int,
       json["id"] as int,
@@ -109,6 +109,13 @@ Secondary convertSecondary(dynamic json) {
     json["move_speed"] as double,
     json["loot_items_count"] as int,
     json["initiative"] as double,
+  );
+}
+
+PendingOperation convertOperation(dynamic json) {
+  return PendingOperation(
+    json["status"] as String,
+    json["status_url"] as String,
   );
 }
 

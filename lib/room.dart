@@ -82,6 +82,20 @@ class Room {
           await _trySendMessage("Тебе стоит попытаться еще раз.");
         }
         break;
+      case "/help":
+        final operation = await _taleApi.help();
+        await _trySendMessage("Пытаюсь помочь!");
+
+        Timer.periodic(Duration(seconds: 1), (timer) async {
+          final status = await _taleApi.checkOperation(operation.statusUrl);
+          if (!status.isProcessing) {
+            timer.cancel();
+
+            final gameInfo = await _taleApi.gameInfo();
+            await _trySendMessage("${gameInfo.account.hero.base.name}, рад помощи!");
+          }
+        });
+        break;
     }
   }
 

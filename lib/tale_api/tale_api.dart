@@ -76,6 +76,22 @@ class TaleApi {
     return _processResponse(response.body, convertGameInfo);
   }
 
+  Future<PendingOperation> help() async {
+    const method = "/game/abilities/help/api/use";
+    final response = await http.post(
+        "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
+        headers: await _createHeaders());
+
+    return convertOperation(json.decode(response.body));
+  }
+
+  Future<PendingOperation> checkOperation(String pendingUrl) async {
+    final response =
+        await http.get("$apiUrl/$pendingUrl", headers: await _createHeaders());
+
+    return _processResponse(response.body, convertOperation);
+  }
+
   Future<Map<String, String>> _createHeaders() async {
     final session = await userManager.readUserSession();
     return {

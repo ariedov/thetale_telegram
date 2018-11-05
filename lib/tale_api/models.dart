@@ -121,3 +121,12 @@ class Secondary {
 
   Secondary(this.maxBagSize, this.power, this.moveSpeed, this.lootItemsCount, this.initiative);
 }
+
+class PendingOperation {
+  final String status;
+  final String statusUrl;
+
+  PendingOperation(this.status, this.statusUrl);
+
+  bool get isProcessing => status == "processing";
+}

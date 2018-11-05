@@ -118,4 +118,14 @@ void main() {
     final gameInfo = convertGameInfo(jsonPayload);
     expect(gameInfo.account.hero.base.name, "Сурен");
   });
+
+  test("test processing operation", () {
+    const payload =
+        """{"status": "processing", "status_url": "/postponed-tasks/35657544/status"}""";
+    final jsonPayload = json.decode(payload);
+
+    final status = convertOperation(jsonPayload);
+    expect(status.status, "processing");
+    expect(status.statusUrl, "/postponed-tasks/35657544/status");
+  });
 }
