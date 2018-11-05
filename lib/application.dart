@@ -16,7 +16,7 @@ class Application {
 
     final portEnv = Platform.environment['PORT'];
     final portInt = portEnv == null ? 8080 : int.parse(portEnv);
-    print("port $portInt");
+    print("port $portInt"); 
     await server.startServer(port: portInt);
 
     await setupWebHook("https://epictale-telegram.herokuapp.com/");
