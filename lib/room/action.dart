@@ -1,0 +1,111 @@
+import 'dart:async';
+
+import 'package:epictale_telegram/tale_api/tale_api.dart';
+import 'package:epictale_telegram/telegram_api/models.dart';
+import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+
+abstract class Action {
+  final TaleApi _taleApi;
+  final TelegramApi _telegramApi;
+
+  Action(this._taleApi, this._telegramApi);
+
+  Future<void> performAction();
+
+  TaleApi get taleApi => _taleApi;
+  TelegramApi get telegramApi => _telegramApi;
+
+  Future<Message> trySendMessage(String message,
+      {ReplyKeyboard keyboard}) async {
+    try {
+      return await telegramApi.sendMessage(message, keyboard: keyboard);
+    } catch (e) {
+      print("Failed to send message");
+    }
+    return null;
+  }
+}
+
+class StartAction extends Action {
+  StartAction(TaleApi taleApi, TelegramApi telegramApi)
+      : super(taleApi, telegramApi);
+
+  @override
+  Future<void> performAction() async {
+    await trySendMessage("Привет, хранитель!");
+
+    final info = await taleApi.apiInfo();
+
+    await trySendMessage(
+        "Версия игры ${info.gameVersion}. Сейчас попробую тебя авторизовать.");
+
+    final link = await taleApi.auth();
+    await trySendMessage(
+      "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",
+      keyboard: ReplyKeyboard([
+        ["/auth"]
+      ]),
+    );
+  }
+}
+
+class ConfirmAuthAction extends Action {
+  ConfirmAuthAction(TaleApi taleApi, TelegramApi telegramApi)
+      : super(taleApi, telegramApi);
+
+  @override
+  Future<void> performAction() async {
+    final status = await taleApi.authStatus();
+
+    if (status.isAccepted) {
+      await trySendMessage("Ну привет, ${status.accountName}.");
+
+      final gameInfo = await _taleApi.gameInfo();
+      await trySendMessage("${gameInfo.account.hero.base.name}, уже заждался.");
+    } else {
+      await trySendMessage("Тебе стоит попытаться еще раз.");
+    }
+  }
+}
+
+class HelpAction extends Action {
+  HelpAction(TaleApi taleApi, TelegramApi telegramApi)
+      : super(taleApi, telegramApi);
+
+  @override
+  Future<void> performAction() async {
+    final operation = await _taleApi.help();
+    await trySendMessage("Пытаюсь помочь!");
+
+    Timer.periodic(Duration(seconds: 1), (timer) async {
+      final status = await taleApi.checkOperation(operation.statusUrl);
+      if (!status.isProcessing) {
+        timer.cancel();
+
+        final gameInfo = await taleApi.gameInfo();
+        await trySendMessage(
+            "${gameInfo.account.hero.base.name}, рад помощи!.");
+      }
+    });
+  }
+}
+
+class ActionRouter {
+  final TaleApi _taleApi;
+  final TelegramApi _telegramApi;
+
+  ActionRouter(this._taleApi, this._telegramApi);
+
+  Action route(String action) {
+    switch (action) {
+      case "/start":
+        return StartAction(_taleApi, _telegramApi);
+      case "/auth":
+        return ConfirmAuthAction(_taleApi, _telegramApi);
+      case "/help":
+        return HelpAction(_taleApi, _telegramApi);
+      default:
+        throw "Action $action not supported";
+    }
+  }
+}

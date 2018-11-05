@@ -63,8 +63,11 @@ class TaleApi {
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
         headers: await _createHeaders());
 
-    await _processHeader(response.headers);
-    return _processResponse(response.body, convertThirdPartyStatus);
+    final status = _processResponse(response.body, convertThirdPartyStatus);
+    if (status.isAccepted) {
+      await _processHeader(response.headers);
+    }
+    return status;
   }
 
   Future<GameInfo> gameInfo() async {
