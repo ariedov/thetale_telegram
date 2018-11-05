@@ -1,5 +1,7 @@
 # epictale_telegram
 
+[![Build Status](https://travis-ci.org/ariedov/thetale_telegram.svg?branch=master)](https://travis-ci.org/ariedov/thetale_telegram)
+
 You can reach the bot here: [@EpicTaleBot](https://t.me/EpicTaleBot)
 
 This application is a telegram bot written in `dart` for [https://the-tale.org/](https://the-tale.org/).
