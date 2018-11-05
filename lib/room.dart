@@ -6,8 +6,11 @@ import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 
 class RoomFactory {
+  final UserManagerProvider _userProvider;
+  RoomFactory(this._userProvider);
+
   Room createRoom(int chatId) {
-    final userManager = MemoryUserManager(chatId);
+    final userManager = _userProvider.getUserManager(chatId);
     final taleApi = TaleApi(userManager);
     final telegramApi = TelegramApi(chatId);
 
@@ -92,7 +95,7 @@ class Room {
             timer.cancel();
 
             final gameInfo = await _taleApi.gameInfo();
-            await _trySendMessage("${gameInfo.account.hero.base.name}, рад помощи!");
+            await _trySendMessage("${gameInfo.account.hero.base.name}, рад помощи!.");
           }
         });
         break;

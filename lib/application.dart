@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room.dart';
 import 'package:epictale_telegram/telegram_api/converters.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:epictale_telegram/server.dart';
+import 'package:mongo_dart/mongo_dart.dart';
 
 class Application {
   Future init() async {
@@ -19,15 +21,23 @@ class Application {
 
     await setupWebHook("https://epictale-telegram.herokuapp.com/");
 
-    final roomFactory = RoomFactory();
-    final roomManager = RoomManager(roomFactory);
+    final db = Db(Platform.environment['MONGODB_URI']);
+    await db.open();
 
-    await for (String data in server.listen()) {
-      print(data);
-      final update = convertUpdate(json.decode(data));
-      final room = roomManager.getRoom(update.message.chat.id);
+    try {
+      final userProvider = UserManagerProvider(db);
+      final roomFactory = RoomFactory(userProvider);
+      final roomManager = RoomManager(roomFactory);
 
-      processRoom(room, update);
+      await for (String data in server.listen()) {
+        print(data);
+        final update = convertUpdate(json.decode(data));
+        final room = roomManager.getRoom(update.message.chat.id);
+
+        processRoom(room, update);
+      }
+    } finally {
+      await db.close();
     }
   }
 
