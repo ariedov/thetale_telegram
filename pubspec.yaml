@@ -1,7 +1,7 @@
 name: epictale_telegram
-description: An empty Aqueduct application.
+description: Telegram bot for https://the-tale.org
 version: 0.0.1
-author: stable|kernel <jobs@stablekernel.com>
+author: David Leibovych <ariedov@gmail.com>
 
 environment:
   sdk: ">=2.0.0 <3.0.0"

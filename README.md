@@ -1,21 +1,24 @@
 # epictale_telegram
 
+You can reach the bot here: [@EpicTaleBot](https://t.me/EpicTaleBot)
+
+This application is a telegram bot written in `dart` for [https://the-tale.org/](https://the-tale.org/).
+The only dependencies are the `http` for communicating with telegram and `mongo_dart` for persistence.
+
+The application does store the users `csrf` token and `sessionid` for recovering the session after server restart.
+
 ## Running the Application Locally
 
-Run `aqueduct serve` from this directory to run the application. For running within an IDE, run `bin/main.dart`. By default, a configuration file named `config.yaml` will be used.
+Run the `bin/main.dart` file.
 
-To generate a SwaggerUI client, run `aqueduct document client`.
+```bash
+./dart-sdk/bin/dart bin/main.dart
+```
 
 ## Running Application Tests
 
-To run all tests for this application, run the following in this directory:
+To run tests execute:
 
+```bash
+pub run test test/
 ```
-pub run test
-```
-
-The default configuration file used when testing is `config.src.yaml`. This file should be checked into version control. It also the template for configuration files used in deployment.
-
-## Deploying an Application
-
-See the documentation for [Deployment](https://aqueduct.io/docs/deploy/).
