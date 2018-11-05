@@ -9,7 +9,7 @@ void main() {
   test("test start", () async {
     final taleMock = TaleApiMock();
     final telegramMock = TelegramApiMock();
-    final room = Room(0, taleMock, telegramMock);
+    final room = Room(taleMock, telegramMock);
 
     final update = Update(
       0,

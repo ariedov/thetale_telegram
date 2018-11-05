@@ -19,7 +19,7 @@ class Application {
     print("port $portInt"); 
     await server.startServer(port: portInt);
 
-    await setupWebHook("https://epictale-telegram.herokuapp.com/");
+    await setupWebHook(Platform.environment['TELEGRAM_WEBHOOK']);
 
     final db = Db(Platform.environment['MONGODB_URI']);
     await db.open();

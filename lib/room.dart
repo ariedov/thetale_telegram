@@ -15,7 +15,7 @@ class RoomFactory {
     final taleApi = TaleApi(userManager);
     final telegramApi = TelegramApi(chatId);
 
-    return Room(chatId, taleApi, telegramApi);
+    return Room(taleApi, telegramApi);
   }
 }
 
@@ -34,13 +34,12 @@ class RoomManager {
 }
 
 class Room {
-  final int _chatId;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
   
   ActionRouter _actionRouter;
 
-  Room(this._chatId, this._taleApi, this._telegramApi) {
+  Room(this._taleApi, this._telegramApi) {
     _actionRouter = ActionRouter(_taleApi, _telegramApi);
   }
 
