@@ -34,6 +34,8 @@ class Application {
 
         processRoom(room, update);
       }
+    } catch (e) {
+      print(e);
     } finally {
       await db.close();
     }
