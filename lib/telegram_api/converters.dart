@@ -12,7 +12,7 @@ CallbackQuery convertCallbackQuery(dynamic json) {
   if (json == null) {
     return null;
   }
-  
+
   return CallbackQuery(
     json["id"] as String,
     convertUser(json["from"]),
@@ -30,6 +30,10 @@ Message convertMessageAction(dynamic json) {
 }
 
 Message convertMessage(dynamic json) {
+  if (json == null) {
+    return null;
+  }
+  
   return Message(
     json["message_id"] as int,
     convertUser(json["from"]),
