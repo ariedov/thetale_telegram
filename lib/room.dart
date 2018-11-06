@@ -45,14 +45,12 @@ class Room {
 
   /// This method will call both telegram and tale api
   Future processUpdate(Update update) async {
-    if (update.isFromBot) {
-      return;
-    }
-
     try {
-      String message = update.message.text;
+      String message;
       if (update.callbackQuery != null) {
         message = update.callbackQuery.data;
+      } else {
+        message = update.message.text;
       }
       await _processMessage(message);
     } catch (e) {
