@@ -90,4 +90,14 @@ void main() {
     final encoded = encodeKeyboard(keyboard);
     expect(encoded, "{\"keyboard\":[[\"text\"]],\"resize_keyboard\":true}");
   });
+
+  test("inline convert", () {
+    final keyboard = InlineKeyboard([[
+      InlineKeyboardButton("text", "text")
+    ]]);
+
+    final encoded = encodeInlineKeyboard(keyboard);
+    final decoded = json.decode(encoded);
+    expect(decoded["inline_keyboard"][0][0]["text"], "text");
+  });
 }

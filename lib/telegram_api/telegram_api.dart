@@ -17,12 +17,15 @@ class TelegramApi {
 
   TelegramApi(this.chatId);
 
-  Future<Message> sendMessage(String message, {ReplyKeyboard keyboard}) async {
+  Future<Message> sendMessage(String message,
+      {ReplyKeyboard keyboard, InlineKeyboard inlineKeyboard}) async {
     final response = await http
         .post("https://api.telegram.org/bot$token/sendMessage", body: {
       "chat_id": chatId.toString(),
       "text": message,
-      "reply_markup": keyboard != null ? encodeKeyboard(keyboard) : "",
+      "reply_markup": keyboard != null
+          ? encodeKeyboard(keyboard)
+          : inlineKeyboard != null ? encodeInlineKeyboard(inlineKeyboard) : "",
     });
 
     print("Send message body: ${response.body}");
@@ -36,4 +39,21 @@ String encodeKeyboard(ReplyKeyboard keyboard) {
             "keyboard": object.keyboard,
             "resize_keyboard": object.resizeKeyboard
           });
+}
+
+String encodeInlineKeyboard(InlineKeyboard keyboard) {
+  return "{\"inline_keyboard\": [[${_mapKeyboardInline(keyboard)}]]}";
+}
+
+String _mapKeyboardInline(InlineKeyboard keyboard) {
+  final result = StringBuffer();
+  for (final row in keyboard.keyboard) {
+    for (final item in row) {
+      result.write("""{
+        "text": "${item.text}",
+        "callback_data": "${item.callbackData}"
+      }""");
+    }
+  }
+  return result.toString();
 }

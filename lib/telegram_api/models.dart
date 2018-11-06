@@ -71,3 +71,17 @@ class ReplyKeyboard {
 
   ReplyKeyboard(this.keyboard);
 }
+
+class InlineKeyboard {
+
+  final List<List<InlineKeyboardButton>> keyboard;
+
+  InlineKeyboard(this.keyboard);
+}
+
+class InlineKeyboardButton {
+  final String text;
+  final String callbackData;
+
+  InlineKeyboardButton(this.text, this.callbackData);
+}
