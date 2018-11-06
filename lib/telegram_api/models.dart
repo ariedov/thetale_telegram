@@ -7,6 +7,10 @@ class Update {
 
   int get chatId =>
       callbackQuery != null ? callbackQuery.message.chat.id : message.chat.id;
+
+  bool get isFromBot => callbackQuery != null
+      ? callbackQuery.message.from.isBot
+      : message.from.isBot;
 }
 
 class CallbackQuery {
