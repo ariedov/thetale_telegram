@@ -74,9 +74,7 @@ class ConfirmAuthAction extends Action {
           ]));
 
       final gameInfo = await _taleApi.gameInfo();
-      await trySendMessage("""
-      ${gameInfo.account.hero.base.name} уже заждался.
-      ${generateAccountInfo(gameInfo.account)}
+      await trySendMessage("""${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}
       """);
     } else {
       await trySendMessage("Тебе стоит попытаться еще раз.");
@@ -107,10 +105,7 @@ class InfoAction extends Action {
   @override
   Future<void> performAction() async {
     final info = await taleApi.gameInfo();
-    await trySendMessage("""
-    ${info.account.hero.base.name}
-    ${generateAccountInfo(info.account)}
-    """);
+    await trySendMessage("${info.account.hero.base.name}\n${generateAccountInfo(info.account)}");
   }
 }
 
@@ -129,9 +124,7 @@ class HelpAction extends Action {
         timer.cancel();
 
         final gameInfo = await taleApi.gameInfo();
-        await trySendMessage("""${gameInfo.account.hero.base.name}, рад помощи!
-            ${generateAccountInfo(gameInfo.account)}
-            """);
+        await trySendMessage("${gameInfo.account.hero.base.name} рад помощи!\n${generateAccountInfo(gameInfo.account)}");
       }
     });
   }
@@ -162,9 +155,10 @@ class ActionRouter {
 }
 
 String generateAccountInfo(Account info) {
-  return """
-  Жизнь: ${info.hero.base.health} / ${info.hero.base.maxHealth}
-  Опыт: ${info.hero.base.experience} / ${info.hero.base.experienceToLevel}
-  Денег: ${info.hero.base.money}
-  """;
+  final buffer = StringBuffer();
+  buffer.writeln("⚡️ Энергия: *${info.energy}*");
+  buffer.writeln("❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
+  buffer.writeln("⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
+  buffer.writeln("💰 Денег: *${info.hero.base.money}*");
+  return buffer.toString();
 }

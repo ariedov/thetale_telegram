@@ -5,7 +5,6 @@ import 'package:epictale_telegram/telegram_api/converters.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:http/http.dart' as http;
 
-
 Future<void> setupWebHook(String url) async {
   return http.post("https://api.telegram.org/bot$token/setWebhook",
       body: {"url": url});
@@ -25,6 +24,7 @@ class TelegramApi {
       "reply_markup": keyboard != null
           ? encodeKeyboard(keyboard)
           : inlineKeyboard != null ? encodeInlineKeyboard(inlineKeyboard) : "",
+      "parse_mode": "Markdown",
     });
 
     print("Send message body: ${response.body}");
