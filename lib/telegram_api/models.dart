@@ -1,8 +1,22 @@
 class Update {
   final int updateId;
+  final CallbackQuery callbackQuery;
   final Message message;
 
-  Update(this.updateId, this.message);
+  Update(this.updateId, this.callbackQuery, this.message);
+}
+
+class CallbackQuery {
+  final String id;
+  final User user;
+  final Message message;
+  final String inlineMessageId;
+  final String chatInstance;
+  final String data;
+  final String gameShortName;
+
+  CallbackQuery(this.id, this.user, this.message, this.inlineMessageId,
+      this.chatInstance, this.data, this.gameShortName);
 }
 
 class Message {
@@ -13,7 +27,8 @@ class Message {
   final String text;
   final List<MessageEntity> entities;
 
-  Message(this.messageId, this.from, this.chat, this.date, this.text, this.entities);
+  Message(this.messageId, this.from, this.chat, this.date, this.text,
+      this.entities);
 }
 
 class User {
@@ -65,7 +80,6 @@ enum MessageEntityType {
 }
 
 class ReplyKeyboard {
-
   final List<List<String>> keyboard;
   final bool resizeKeyboard = true;
 
@@ -73,7 +87,6 @@ class ReplyKeyboard {
 }
 
 class InlineKeyboard {
-
   final List<List<InlineKeyboardButton>> keyboard;
 
   InlineKeyboard(this.keyboard);

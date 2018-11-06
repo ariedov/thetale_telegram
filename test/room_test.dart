@@ -12,14 +12,16 @@ void main() {
     final room = Room(taleMock, telegramMock);
 
     final update = Update(
-      0,
-      Message(0, 
-      User(0, "firstName", "lastName", "username", "languageCode", isBot: false), 
-      Chat(0, "firstName", "lastName", "userName", ChatType.private), 
-      0, 
-      "/start", 
-      [])
-    );
+        0,
+        null,
+        Message(
+            0,
+            User(0, "firstName", "lastName", "username", "languageCode",
+                isBot: false),
+            Chat(0, "firstName", "lastName", "userName", ChatType.private),
+            0,
+            "/start",
+            []));
 
     await room.processUpdate(update);
 

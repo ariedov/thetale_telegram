@@ -3,7 +3,24 @@ import 'package:epictale_telegram/telegram_api/models.dart';
 Update convertUpdate(dynamic json) {
   return Update(
     json["update_id"] as int,
+    convertCallbackQuery(json["callback_query"]),
     convertMessage(json["message"]),
+  );
+}
+
+CallbackQuery convertCallbackQuery(dynamic json) {
+  if (json == null) {
+    return null;
+  }
+  
+  return CallbackQuery(
+    json["id"] as String,
+    convertUser(json["from"]),
+    convertMessage(json["message"]),
+    json["inline_message_id"] as String,
+    json["chat_instance"] as String,
+    json["data"] as String,
+    json["game_short_name"] as String,
   );
 }
 

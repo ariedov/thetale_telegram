@@ -19,7 +19,8 @@ abstract class Action {
   Future<Message> trySendMessage(String message,
       {ReplyKeyboard keyboard, InlineKeyboard inlineKeyboard}) async {
     try {
-      return await telegramApi.sendMessage(message, keyboard: keyboard, inlineKeyboard: inlineKeyboard);
+      return await telegramApi.sendMessage(message,
+          keyboard: keyboard, inlineKeyboard: inlineKeyboard);
     } catch (e) {
       print("Failed to send message");
     }
@@ -50,8 +51,8 @@ class StartAction extends Action {
     final link = await taleApi.auth();
     await trySendMessage(
       "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",
-      keyboard: ReplyKeyboard([
-        ["/confirm"]
+      inlineKeyboard: InlineKeyboard([
+        [InlineKeyboardButton("/confirm", "/confirm")]
       ]),
     );
   }

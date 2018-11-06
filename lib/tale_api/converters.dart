@@ -74,6 +74,10 @@ Hero convertHero(dynamic json) {
 }
 
 Companion convertCompanion(dynamic json) {
+  if (json == null) {
+    return null;
+  }
+
   return Companion(
     json["type"] as int,
     json["name"] as String,
@@ -103,6 +107,10 @@ Base convertBase(dynamic json) {
 }
 
 Secondary convertSecondary(dynamic json) {
+  if (json == null) {
+    return null;
+  }
+
   return Secondary(
     json["max_bag_size"] as double,
     json["power"] as List<dynamic>,

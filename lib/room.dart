@@ -36,7 +36,7 @@ class RoomManager {
 class Room {
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
-  
+
   ActionRouter _actionRouter;
 
   Room(this._taleApi, this._telegramApi) {
@@ -50,7 +50,11 @@ class Room {
     }
 
     try {
-      await _processMessage(update.message.text);
+      String message = update.message.text;
+      if (update.callbackQuery != null) {
+        message = update.callbackQuery.data;
+      }
+      await _processMessage(message);
     } catch (e) {
       print(e);
     }
