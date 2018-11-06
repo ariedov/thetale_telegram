@@ -81,7 +81,7 @@ class MongoUserManager implements UserManager {
   Future<bool> isAuthorized() async {
     final rooms = db.collection("rooms");
     final room = await rooms.findOne(where.eq("chat_id", chatId));
-    return room["is_authorized"] as bool;
+    return room != null && room["is_authorized"] as bool;
   }
 }
 
