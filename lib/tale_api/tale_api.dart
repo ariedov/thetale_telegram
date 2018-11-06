@@ -28,18 +28,18 @@ class TaleApi {
     print("Headers: ${response.headers}");
     print("Body: ${response.body}");
 
-    await _processHeader(response.headers);
+    await _processHeader(response.headers, isAuthorized: false);
     return _processResponse<ApiInfo>(response.body, convertApiInfo);
   }
 
-  Future _processHeader(Map<String, String> headers) async {
+  Future _processHeader(Map<String, String> headers, {bool isAuthorized = true}) async {
     final setCookie = headers["set-cookie"];
     print("Set Cookie: $setCookie");
 
     final session = readSessionInfo(setCookie);
     print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
 
-    await userManager.saveUserSession(session);
+    await userManager.saveUserSession(session, isAuthorized: isAuthorized);
   }
 
   Future<ThirdPartyLink> auth() async {
@@ -66,8 +66,9 @@ class TaleApi {
         headers: await _createHeaders());
 
     final status = _processResponse(response.body, convertThirdPartyStatus);
-    if (status.isAccepted && !await userManager.isAuthorized()) {
-      await _processHeader(response.headers);
+    final isAuthorized = await userManager.isAuthorized();
+    if (status.isAccepted && !isAuthorized) {
+      await _processHeader(response.headers, isAuthorized: true);
     }
     return status;
   }

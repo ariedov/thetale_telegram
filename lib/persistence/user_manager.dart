@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 
 abstract class UserManager {
-  Future<void> saveUserSession(SessionInfo info);
+  Future<void> saveUserSession(SessionInfo info, {bool isAuthorized});
 
   Future<SessionInfo> readUserSession();
 
@@ -24,8 +24,9 @@ class MemoryUserManager implements UserManager {
   }
 
   @override
-  Future<void> saveUserSession(SessionInfo info) async {
+  Future<void> saveUserSession(SessionInfo info, {bool isAuthorized}) async {
     sessionInfo[chatId] = info;
+    _isAuthorized = isAuthorized;
   }
 
   @override
@@ -57,14 +58,14 @@ class MongoUserManager implements UserManager {
   }
 
   @override
-  Future<void> saveUserSession(SessionInfo info) async {
+  Future<void> saveUserSession(SessionInfo info, {bool isAuthorized = true}) async {
     final rooms = db.collection("rooms");
     await rooms.remove(where.eq("chat_id", chatId));
     await rooms.insert({
       "chat_id": chatId,
       "session_id": info.sessionId,
       "csrf_token": info.csrfToken,
-      "is_authorized": true
+      "is_authorized": isAuthorized
     });
   }
 
@@ -72,9 +73,15 @@ class MongoUserManager implements UserManager {
   Future<void> setAuthorized({bool authorized}) async {
     final rooms = db.collection("rooms");
     final room = await rooms.findOne(where.eq("chat_id", chatId));
-    room["is_authorized"] = authorized;
-
-    await rooms.save(room);
+    if (room != null) {
+      room["is_authorized"] = authorized;
+      await rooms.save(room);
+    } else {
+      await rooms.insert({
+        "chat_id": chatId,
+        "is_authorized": authorized
+      });
+    }
   }
 
   @override
