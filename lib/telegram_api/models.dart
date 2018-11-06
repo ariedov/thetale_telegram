@@ -4,6 +4,9 @@ class Update {
   final Message message;
 
   Update(this.updateId, this.callbackQuery, this.message);
+
+  int get chatId =>
+      callbackQuery != null ? callbackQuery.message.chat.id : message.chat.id;
 }
 
 class CallbackQuery {

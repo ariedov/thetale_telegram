@@ -30,7 +30,7 @@ class Application {
       await for (String data in server.listen()) {
         print(data);
         final update = convertUpdate(json.decode(data));
-        final room = roomManager.getRoom(update.message.chat.id);
+        final room = roomManager.getRoom(update.chatId);
 
         processRoom(room, update);
       }
