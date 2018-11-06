@@ -113,7 +113,7 @@ class Base {
 }
 
 class Secondary {
-  final double maxBagSize;
+  final int maxBagSize;
   final List<dynamic> power;
   final double moveSpeed;
   final int lootItemsCount;

@@ -112,7 +112,7 @@ Secondary convertSecondary(dynamic json) {
   }
 
   return Secondary(
-    json["max_bag_size"] as double,
+    json["max_bag_size"] as int,
     json["power"] as List<dynamic>,
     json["move_speed"] as double,
     json["loot_items_count"] as int,
