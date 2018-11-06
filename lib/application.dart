@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
+import 'package:epictale_telegram/constants.dart';
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room.dart';
 import 'package:epictale_telegram/telegram_api/converters.dart';
@@ -14,14 +14,12 @@ class Application {
   Future init() async {
     final server = Server();
 
-    final portEnv = Platform.environment['PORT'];
-    final portInt = portEnv == null ? 8080 : int.parse(portEnv);
-    print("port $portInt"); 
-    await server.startServer(port: portInt);
+    print("port $port"); 
+    await server.startServer(port: port);
 
-    await setupWebHook(Platform.environment['TELEGRAM_WEBHOOK']);
+    await setupWebHook(telegramWebhook);
 
-    final db = Db(Platform.environment['MONGODB_URI']);
+    final db = Db(mongodbUri);
     await db.open();
 
     try {

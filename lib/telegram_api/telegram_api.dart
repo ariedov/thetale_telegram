@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'package:epictale_telegram/constants.dart';
 import 'package:epictale_telegram/telegram_api/converters.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:http/http.dart' as http;
 
-String get token => Platform.environment['TELEGRAM_BOT_ID'];
 
 Future<void> setupWebHook(String url) async {
   return http.post("https://api.telegram.org/bot$token/setWebhook",
