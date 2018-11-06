@@ -88,6 +88,7 @@ class RequestAuthAction extends Action {
 
   @override
   Future<void> performAction() async {
+    await taleApi.apiInfo();
     final link = await taleApi.auth();
     await trySendMessage(
       "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",

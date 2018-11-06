@@ -5,12 +5,16 @@ abstract class UserManager {
   Future<void> saveUserSession(SessionInfo info);
 
   Future<SessionInfo> readUserSession();
+
+  Future<void> setAuthorized({bool authorized});
+
+  Future<bool> isAuthorized();
 }
 
 class MemoryUserManager implements UserManager {
-
   final int chatId;
   final Map<int, SessionInfo> sessionInfo = {};
+  bool _isAuthorized = false;
 
   MemoryUserManager(this.chatId);
 
@@ -23,10 +27,19 @@ class MemoryUserManager implements UserManager {
   Future<void> saveUserSession(SessionInfo info) async {
     sessionInfo[chatId] = info;
   }
+
+  @override
+  Future<void> setAuthorized({bool authorized}) async {
+    _isAuthorized = authorized;
+  }
+
+  @override
+  Future<bool> isAuthorized() async {
+    return _isAuthorized;
+  }
 }
 
 class MongoUserManager implements UserManager {
-
   final int chatId;
   final Db db;
 
@@ -50,13 +63,29 @@ class MongoUserManager implements UserManager {
     await rooms.insert({
       "chat_id": chatId,
       "session_id": info.sessionId,
-      "csrf_token": info.csrfToken
+      "csrf_token": info.csrfToken,
+      "is_authorized": true
     });
+  }
+
+  @override
+  Future<void> setAuthorized({bool authorized}) async {
+    final rooms = db.collection("rooms");
+    final room = await rooms.findOne(where.eq("chat_id", chatId));
+    room["is_authorized"] = authorized;
+
+    await rooms.save(room);
+  }
+
+  @override
+  Future<bool> isAuthorized() async {
+    final rooms = db.collection("rooms");
+    final room = await rooms.findOne(where.eq("chat_id", chatId));
+    return room["is_authorized"] as bool;
   }
 }
 
 class SessionInfo {
-
   final String sessionId;
   final String csrfToken;
 
@@ -64,7 +93,6 @@ class SessionInfo {
 }
 
 class UserManagerProvider {
-
   final Db _db;
 
   UserManagerProvider(this._db);
