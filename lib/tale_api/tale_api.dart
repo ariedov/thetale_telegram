@@ -19,8 +19,6 @@ class TaleApi {
   TaleApi(this.userManager);
 
   Future<ApiInfo> apiInfo() async {
-    await userManager.setAuthorized(authorized: false);
-
     const method = "/api/info";
     final response = await http.get(
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion");

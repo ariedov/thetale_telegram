@@ -38,6 +38,7 @@ class StartAction extends Action {
   Future<void> performAction() async {
     await trySendMessage("Привет, хранитель!");
 
+    await _userManager.setAuthorized(authorized: false);
     final info = await taleApi.apiInfo();
 
     await trySendMessage("""
@@ -117,7 +118,7 @@ class InfoAction extends Action {
     }
     final info = await taleApi.gameInfo();
     await trySendMessage(
-        "${info.account.hero.base.name}\n${generateAccountInfo(info.account)}");
+        "${info.account.hero.base.name} ${info.account.hero.action?.description ?? ""}.\n${generateAccountInfo(info.account)}");
   }
 }
 
@@ -143,7 +144,7 @@ class HelpAction extends Action {
 
         final gameInfo = await taleApi.gameInfo();
         await trySendMessage(
-            "${gameInfo.account.hero.base.name} рад помощи!\n${generateAccountInfo(gameInfo.account)}");
+            "${gameInfo.account.hero.base.name} рад помощи и ${gameInfo.account.hero.action?.description ?? ""}.\n${generateAccountInfo(gameInfo.account)}");
       }
     });
   }

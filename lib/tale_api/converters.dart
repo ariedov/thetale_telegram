@@ -70,6 +70,7 @@ Hero convertHero(dynamic json) {
     convertSecondary(json["secondary"]),
     json["diary"] as int,
     json["messages"] as List<dynamic>,
+    convertAction(json["action"]),
   );
 }
 
@@ -117,6 +118,19 @@ Secondary convertSecondary(dynamic json) {
     json["move_speed"] as double,
     json["loot_items_count"] as int,
     json["initiative"] as double,
+  );
+}
+
+Action convertAction(dynamic json) {
+  if (json == null) {
+    return null;
+  }
+
+  return Action(
+    json["percents"] as double,
+    json["description"] as String,
+    json["info_link"] as String,
+    json["type"] as int,
   );
 }
 

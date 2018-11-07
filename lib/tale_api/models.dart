@@ -79,8 +79,18 @@ class Hero {
   final Secondary secondary;
   final int diary;
   final List<dynamic> messages;
+  final Action action;
 
-  Hero(this.patchTurn, this.companion, this.base, this.secondary, this.diary, this.messages);
+  Hero(this.patchTurn, this.companion, this.base, this.secondary, this.diary, this.messages, this.action);
+}
+
+class Action {
+  final double percents;
+  final String description;
+  final String infoLink;
+  final int type;
+
+  Action(this.percents, this.description, this.infoLink, this.type);
 }
 
 class Companion {
