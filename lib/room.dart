@@ -15,7 +15,7 @@ class RoomFactory {
     final taleApi = TaleApi(userManager);
     final telegramApi = TelegramApi(chatId);
 
-    return Room(taleApi, telegramApi);
+    return Room(userManager, taleApi, telegramApi);
   }
 }
 
@@ -34,13 +34,14 @@ class RoomManager {
 }
 
 class Room {
+  final UserManager _userManager;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
 
   ActionRouter _actionRouter;
 
-  Room(this._taleApi, this._telegramApi) {
-    _actionRouter = ActionRouter(_taleApi, _telegramApi);
+  Room(this._userManager, this._taleApi, this._telegramApi) {
+    _actionRouter = ActionRouter(_userManager, _taleApi, _telegramApi);
   }
 
   /// This method will call both telegram and tale api

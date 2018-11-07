@@ -1,15 +1,17 @@
 import 'dart:async';
 
+import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/tale_api/models.dart';
 import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 
 abstract class Action {
+  final UserManager _userManager;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
 
-  Action(this._taleApi, this._telegramApi);
+  Action(this._userManager, this._taleApi, this._telegramApi);
 
   Future<void> performAction();
 
@@ -29,8 +31,8 @@ abstract class Action {
 }
 
 class StartAction extends Action {
-  StartAction(TaleApi taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  StartAction(UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
 
   @override
   Future<void> performAction() async {
@@ -59,8 +61,9 @@ class StartAction extends Action {
 }
 
 class ConfirmAuthAction extends Action {
-  ConfirmAuthAction(TaleApi taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  ConfirmAuthAction(
+      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
 
   @override
   Future<void> performAction() async {
@@ -74,7 +77,8 @@ class ConfirmAuthAction extends Action {
           ]));
 
       final gameInfo = await _taleApi.gameInfo();
-      await trySendMessage("""${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}
+      await trySendMessage(
+          """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}
       """);
     } else {
       await trySendMessage("Тебе стоит попытаться еще раз.");
@@ -83,8 +87,9 @@ class ConfirmAuthAction extends Action {
 }
 
 class RequestAuthAction extends Action {
-  RequestAuthAction(TaleApi taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  RequestAuthAction(
+      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
 
   @override
   Future<void> performAction() async {
@@ -100,22 +105,34 @@ class RequestAuthAction extends Action {
 }
 
 class InfoAction extends Action {
-  InfoAction(TaleApi taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  InfoAction(UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
 
   @override
   Future<void> performAction() async {
+    if (!await _userManager.isAuthorized()) {
+      await trySendMessage(
+          "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
+      return;
+    }
     final info = await taleApi.gameInfo();
-    await trySendMessage("${info.account.hero.base.name}\n${generateAccountInfo(info.account)}");
+    await trySendMessage(
+        "${info.account.hero.base.name}\n${generateAccountInfo(info.account)}");
   }
 }
 
 class HelpAction extends Action {
-  HelpAction(TaleApi taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  HelpAction(UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
 
   @override
   Future<void> performAction() async {
+    if (!await _userManager.isAuthorized()) {
+      await trySendMessage(
+          "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
+      return;
+    }
+
     final operation = await _taleApi.help();
     await trySendMessage("Пытаюсь помочь!");
 
@@ -125,30 +142,32 @@ class HelpAction extends Action {
         timer.cancel();
 
         final gameInfo = await taleApi.gameInfo();
-        await trySendMessage("${gameInfo.account.hero.base.name} рад помощи!\n${generateAccountInfo(gameInfo.account)}");
+        await trySendMessage(
+            "${gameInfo.account.hero.base.name} рад помощи!\n${generateAccountInfo(gameInfo.account)}");
       }
     });
   }
 }
 
 class ActionRouter {
+  final UserManager _userManager;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
 
-  ActionRouter(this._taleApi, this._telegramApi);
+  ActionRouter(this._userManager, this._taleApi, this._telegramApi);
 
   Action route(String action) {
     switch (action) {
       case "/start":
-        return StartAction(_taleApi, _telegramApi);
+        return StartAction(_userManager, _taleApi, _telegramApi);
       case "/confirm":
-        return ConfirmAuthAction(_taleApi, _telegramApi);
+        return ConfirmAuthAction(_userManager, _taleApi, _telegramApi);
       case "/auth":
-        return RequestAuthAction(_taleApi, _telegramApi);
+        return RequestAuthAction(_userManager, _taleApi, _telegramApi);
       case "/info":
-        return InfoAction(_taleApi, _telegramApi);
+        return InfoAction(_userManager, _taleApi, _telegramApi);
       case "/help":
-        return HelpAction(_taleApi, _telegramApi);
+        return HelpAction(_userManager, _taleApi, _telegramApi);
       default:
         throw "Action $action not supported";
     }
@@ -158,8 +177,10 @@ class ActionRouter {
 String generateAccountInfo(Account info) {
   final buffer = StringBuffer();
   buffer.writeln("⚡️ Энергия: *${info.energy}*");
-  buffer.writeln("❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
-  buffer.writeln("⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
+  buffer.writeln(
+      "❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
+  buffer.writeln(
+      "⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
   buffer.writeln("💰 Денег: *${info.hero.base.money}*");
   return buffer.toString();
 }
