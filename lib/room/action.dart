@@ -40,7 +40,7 @@ class StartAction extends Action {
 
     await _userManager.setAuthorized(authorized: false);
     final info = await taleApi.apiInfo();
-    await processHeader(_userManager, info.sessionInfo);
+    await processHeader(_userManager, info.sessionInfo, isAuthorized: false);
 
     await trySendMessage("""
         Версия игры ${info.data.gameVersion}. Сейчас попробую тебя авторизовать.
@@ -74,7 +74,7 @@ class ConfirmAuthAction extends Action {
 
     final isAuthorized = await _userManager.isAuthorized();
     if (status.data.isAccepted && !isAuthorized) {
-      await processHeader(_userManager, status.sessionInfo);
+      await processHeader(_userManager, status.sessionInfo, isAuthorized: true);
     }
 
     if (status.data.isAccepted) {
@@ -153,7 +153,7 @@ class HelpAction extends Action {
     await trySendMessage("Пытаюсь помочь!");
 
     Timer.periodic(Duration(seconds: 1), (timer) async {
-      final status = await taleApi.checkOperation(operation.statusUrl);
+      final status = await taleApi.checkOperation(operation.statusUrl, headers: headers);
       if (!status.isProcessing) {
         timer.cancel();
 
