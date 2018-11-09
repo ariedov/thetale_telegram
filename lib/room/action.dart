@@ -103,11 +103,10 @@ class RequestAuthAction extends Action {
   @override
   Future<void> performAction() async {
     await _userManager.setAuthorized(authorized: false);
+    final info = await taleApi.apiInfo();
+    await processHeader(_userManager, info.sessionInfo, isAuthorized: false);
 
-    // update headers
-
-    await taleApi.apiInfo();
-    final link = await taleApi.auth();
+    final link = await taleApi.auth(headers: await createHeaders(_userManager));
     await trySendMessage(
       "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
@@ -153,7 +152,8 @@ class HelpAction extends Action {
     await trySendMessage("Пытаюсь помочь!");
 
     Timer.periodic(Duration(seconds: 1), (timer) async {
-      final status = await taleApi.checkOperation(operation.statusUrl, headers: headers);
+      final status =
+          await taleApi.checkOperation(operation.statusUrl, headers: headers);
       if (!status.isProcessing) {
         timer.cancel();
 
