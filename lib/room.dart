@@ -12,7 +12,7 @@ class RoomFactory {
 
   Room createRoom(int chatId) {
     final userManager = _userProvider.getUserManager(chatId);
-    final taleApi = TaleApi(userManager);
+    final taleApi = TaleApi();
     final telegramApi = TelegramApi(chatId);
 
     return Room(userManager, taleApi, telegramApi);

@@ -7,18 +7,18 @@ import 'package:http/http.dart' as http;
 
 const String appVersion = "0.0.1";
 
+const String apiUrl = "https://the-tale.org";
+
 const String applicationId = "epic_tale_telegram";
 const String applicationName = "Сказка в Телеграмме";
 const String applicationInfo = "Телеграм бот для игры в сказку";
 const String applicationDescription = "Телеграм бот для игры в сказку";
 
 class TaleApi {
-  final String apiUrl = "https://the-tale.org";
-  final UserManager userManager;
 
-  TaleApi(this.userManager);
+  TaleApi();
 
-  Future<ApiInfo> apiInfo() async {
+  Future<SessionDataPair<ApiInfo>> apiInfo() async {
     const method = "/api/info";
     final response = await http.get(
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion");
@@ -26,26 +26,16 @@ class TaleApi {
     print("Headers: ${response.headers}");
     print("Body: ${response.body}");
 
-    await _processHeader(response.headers, isAuthorized: false);
-    return _processResponse<ApiInfo>(response.body, convertApiInfo);
+    return SessionDataPair(readSessionFromHeader(response.headers),
+        _processResponse<ApiInfo>(response.body, convertApiInfo));
   }
 
-  Future _processHeader(Map<String, String> headers, {bool isAuthorized = true}) async {
-    final setCookie = headers["set-cookie"];
-    print("Set Cookie: $setCookie");
-
-    final session = readSessionInfo(setCookie);
-    print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
-
-    await userManager.saveUserSession(session, isAuthorized: isAuthorized);
-  }
-
-  Future<ThirdPartyLink> auth() async {
+  Future<ThirdPartyLink> auth({Map<String, String> headers}) async {
     const method = "/accounts/third-party/tokens/api/request-authorisation";
 
     final response = await http.post(
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
-        headers: await _createHeaders(),
+        headers: headers,
         body: {
           "application_name": applicationName,
           "application_info": applicationInfo,
@@ -56,54 +46,41 @@ class TaleApi {
         response.body, convertThirdPartyLink);
   }
 
-  Future<ThirdPartyStatus> authStatus() async {
+  Future<SessionDataPair<ThirdPartyStatus>> authStatus(
+      {Map<String, String> headers}) async {
     const method = "/accounts/third-party/tokens/api/authorisation-state";
 
     final response = await http.get(
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
-        headers: await _createHeaders());
+        headers: headers);
 
-    final status = _processResponse(response.body, convertThirdPartyStatus);
-    final isAuthorized = await userManager.isAuthorized();
-    if (status.isAccepted && !isAuthorized) {
-      await _processHeader(response.headers, isAuthorized: true);
-    }
-    return status;
+    return SessionDataPair(readSessionFromHeader(response.headers),
+        _processResponse(response.body, convertThirdPartyStatus));
   }
 
-  Future<GameInfo> gameInfo() async {
+  Future<GameInfo> gameInfo({Map<String, String> headers}) async {
     const method = "/game/api/info";
     final response = await http.get(
         "$apiUrl/$method?api_version=1.9&api_client=$applicationId-$appVersion",
-        headers: await _createHeaders());
+        headers: headers);
 
     return _processResponse(response.body, convertGameInfo);
   }
 
-  Future<PendingOperation> help() async {
+  Future<PendingOperation> help({Map<String, String> headers}) async {
     const method = "/game/abilities/help/api/use";
     final response = await http.post(
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
-        headers: await _createHeaders());
+        headers: headers);
 
     return convertOperation(json.decode(response.body));
   }
 
-  Future<PendingOperation> checkOperation(String pendingUrl) async {
+  Future<PendingOperation> checkOperation(String pendingUrl, {Map<String, String> headers}) async {
     final response =
-        await http.get("$apiUrl/$pendingUrl", headers: await _createHeaders());
+        await http.get("$apiUrl/$pendingUrl", headers: headers);
 
     return _processResponse(response.body, convertOperation);
-  }
-
-  Future<Map<String, String>> _createHeaders() async {
-    final session = await userManager.readUserSession();
-    return {
-      "Referer": apiUrl,
-      "X-CSRFToken": session.csrfToken,
-      "Cookie":
-          "csrftoken=${session.csrfToken}; sessionid=${session.sessionId}",
-    };
   }
 
   T _processResponse<T>(String body, T converter(dynamic json)) {
@@ -115,6 +92,12 @@ class TaleApi {
     }
     return taleResponse.data;
   }
+}
+
+SessionInfo readSessionFromHeader(Map<String, String> headers) {
+  final cookie = headers["set-cookie"];
+  print("Set Cookie: $cookie");
+  return readSessionInfo(cookie);
 }
 
 SessionInfo readSessionInfo(String cookie) {
@@ -135,4 +118,11 @@ SessionInfo readSessionInfo(String cookie) {
   }
 
   return SessionInfo(session, csrf);
+}
+
+class SessionDataPair<T> {
+  final SessionInfo sessionInfo;
+  final T data;
+
+  SessionDataPair(this.sessionInfo, this.data);
 }

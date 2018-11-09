@@ -40,9 +40,10 @@ class StartAction extends Action {
 
     await _userManager.setAuthorized(authorized: false);
     final info = await taleApi.apiInfo();
+    await processHeader(_userManager, info.sessionInfo);
 
     await trySendMessage("""
-        Версия игры ${info.gameVersion}. Сейчас попробую тебя авторизовать.
+        Версия игры ${info.data.gameVersion}. Сейчас попробую тебя авторизовать.
         /start - начать все по новой
         /auth - снова авторизироваться
         /confirm - подтвердить авторизацию после того как дал доступ боту (мне)
@@ -51,9 +52,9 @@ class StartAction extends Action {
         /info - получить информацию о герое
         """);
 
-    final link = await taleApi.auth();
+    final link = await taleApi.auth(headers: await createHeaders(_userManager));
     await trySendMessage(
-      "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",
+      "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
         [InlineKeyboardButton("/confirm", "/confirm")]
       ]),
@@ -68,16 +69,23 @@ class ConfirmAuthAction extends Action {
 
   @override
   Future<void> performAction() async {
-    final status = await taleApi.authStatus();
+    final status =
+        await taleApi.authStatus(headers: await createHeaders(_userManager));
 
-    if (status.isAccepted) {
-      await trySendMessage("Ну привет, ${status.accountName}.",
+    final isAuthorized = await _userManager.isAuthorized();
+    if (status.data.isAccepted && !isAuthorized) {
+      await processHeader(_userManager, status.sessionInfo);
+    }
+
+    if (status.data.isAccepted) {
+      await trySendMessage("Ну привет, ${status.data.accountName}.",
           keyboard: ReplyKeyboard([
             ["/help"],
             ["/info"],
           ]));
 
-      final gameInfo = await _taleApi.gameInfo();
+      final gameInfo =
+          await _taleApi.gameInfo(headers: await createHeaders(_userManager));
       await trySendMessage(
           """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}
       """);
@@ -94,10 +102,14 @@ class RequestAuthAction extends Action {
 
   @override
   Future<void> performAction() async {
+    await _userManager.setAuthorized(authorized: false);
+
+    // update headers
+
     await taleApi.apiInfo();
     final link = await taleApi.auth();
     await trySendMessage(
-      "Чтобы авторизоваться - перейди по ссылке ${_taleApi.apiUrl}${link.authorizationPage}",
+      "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
         [InlineKeyboardButton("/confirm", "/confirm")]
       ]),
@@ -116,7 +128,8 @@ class InfoAction extends Action {
           "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
       return;
     }
-    final info = await taleApi.gameInfo();
+    final info =
+        await taleApi.gameInfo(headers: await createHeaders(_userManager));
     await trySendMessage(
         "${info.account.hero.base.name} ${info.account.hero.action?.description ?? ""}.\n${generateAccountInfo(info.account)}");
   }
@@ -134,7 +147,9 @@ class HelpAction extends Action {
       return;
     }
 
-    final operation = await _taleApi.help();
+    final headers = await createHeaders(_userManager);
+
+    final operation = await _taleApi.help(headers: headers);
     await trySendMessage("Пытаюсь помочь!");
 
     Timer.periodic(Duration(seconds: 1), (timer) async {
@@ -142,7 +157,7 @@ class HelpAction extends Action {
       if (!status.isProcessing) {
         timer.cancel();
 
-        final gameInfo = await taleApi.gameInfo();
+        final gameInfo = await taleApi.gameInfo(headers: headers);
         await trySendMessage(
             "${gameInfo.account.hero.base.name} рад помощи и ${gameInfo.account.hero.action?.description ?? ""}.\n${generateAccountInfo(gameInfo.account)}");
       }
@@ -184,4 +199,20 @@ String generateAccountInfo(Account info) {
       "⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
   buffer.writeln("💰 Денег: *${info.hero.base.money}*");
   return buffer.toString();
+}
+
+Future<Map<String, String>> createHeaders(UserManager userManager) async {
+  final session = await userManager.readUserSession();
+  return {
+    "Referer": apiUrl,
+    "X-CSRFToken": session.csrfToken,
+    "Cookie": "csrftoken=${session.csrfToken}; sessionid=${session.sessionId}",
+  };
+}
+
+Future processHeader(UserManager userManager, SessionInfo session,
+    {bool isAuthorized = true}) async {
+  print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
+
+  await userManager.saveUserSession(session, isAuthorized: isAuthorized);
 }
