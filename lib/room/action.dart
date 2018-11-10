@@ -13,18 +13,19 @@ abstract class Action {
 
   Action(this._userManager, this._taleApi, this._telegramApi);
 
-  Future<void> apply() async {
+  Future<void> apply({String account}) async {
     try {
-      await _performAction();
+      await _performAction(account: account);
     } catch (e) {
       if (e is String) {
         await trySendMessage(e);
       }
-      await trySendMessage("Возникла ошибка. Попробуй переподключить аккаунт через /auth");
+      await trySendMessage(
+          "Возникла ошибка. Попробуй переподключить аккаунт через /auth");
     }
   }
 
-  Future<void> _performAction();
+  Future<void> _performAction({String account});
 
   TaleApi get taleApi => _taleApi;
   TelegramApi get telegramApi => _telegramApi;
@@ -46,12 +47,12 @@ class StartAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> _performAction() async {
+  Future<void> _performAction({String account}) async {
     await trySendMessage("Привет, хранитель!");
 
     await _userManager.clearAll();
     final info = await taleApi.apiInfo();
-    await processHeader(_userManager, info.sessionInfo);
+    await _userManager.addUserSession(info.sessionInfo);
 
     await trySendMessage("""
         Версия игры ${info.data.gameVersion}. Сейчас попробую тебя авторизовать.
@@ -67,7 +68,10 @@ class StartAction extends Action {
     await trySendMessage(
       "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
-        [InlineKeyboardButton("/confirm", "/confirm")]
+        [
+          InlineKeyboardButton(
+              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
+        ]
       ]),
     );
   }
@@ -79,12 +83,15 @@ class ConfirmAuthAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> _performAction() async {
-    final status =
-        await taleApi.authStatus(headers: await createHeaders(_userManager));
+  Future<void> _performAction({String account}) async {
+    final session = (await _userManager.readUserSession())
+        .firstWhere((info) => info.sessionId == account);
+        
+    final status = await taleApi.authStatus(
+        headers: await createHeadersFromSession(session));
 
     if (status.data.isAccepted) {
-      await processHeader(_userManager, status.sessionInfo);
+      await _userManager.saveUserSession(status.sessionInfo);
     }
 
     if (status.data.isAccepted) {
@@ -111,17 +118,20 @@ class RequestAuthAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> _performAction() async {
+  Future<void> _performAction({String account}) async {
     await _userManager.clearAll();
     final info = await taleApi.apiInfo();
 
-    await processHeader(_userManager, info.sessionInfo);
+    await _userManager.addUserSession(info.sessionInfo);
 
     final link = await taleApi.auth(headers: await createHeaders(_userManager));
     await trySendMessage(
       "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
-        [InlineKeyboardButton("/confirm", "/confirm")]
+        [
+          InlineKeyboardButton(
+              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
+        ]
       ]),
     );
   }
@@ -132,7 +142,7 @@ class InfoAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> _performAction() async {
+  Future<void> _performAction({String account}) async {
     final sessions = await _userManager.readUserSession();
     if (sessions.isEmpty) {
       await trySendMessage(
@@ -151,7 +161,7 @@ class HelpAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> _performAction() async {
+  Future<void> _performAction({String account}) async {
     final sessions = await _userManager.readUserSession();
     if (sessions.isEmpty) {
       await trySendMessage(
@@ -178,38 +188,35 @@ class HelpAction extends Action {
   }
 }
 
-class ActionRouter {
-  final UserManager _userManager;
-  final TaleApi _taleApi;
-  final TelegramApi _telegramApi;
+class AddAccountAction extends Action {
+  AddAccountAction(
+      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
 
-  ActionRouter(this._userManager, this._taleApi, this._telegramApi);
+  @override
+  Future<void> _performAction({String account}) async {
+    final info = await taleApi.apiInfo();
+    await _userManager.addUserSession(info.sessionInfo);
 
-  Action route(String action) {
-    switch (action) {
-      case "/start":
-        return StartAction(_userManager, _taleApi, _telegramApi);
-      case "/confirm":
-        return ConfirmAuthAction(_userManager, _taleApi, _telegramApi);
-      case "/auth":
-        return RequestAuthAction(_userManager, _taleApi, _telegramApi);
-      case "/info":
-        return InfoAction(_userManager, _taleApi, _telegramApi);
-      case "/help":
-        return HelpAction(_userManager, _taleApi, _telegramApi);
-      default:
-        throw "Action $action not supported";
-    }
+    final link = await taleApi.auth(
+        headers: await createHeadersFromSession(info.sessionInfo));
+    await trySendMessage(
+      "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
+      inlineKeyboard: InlineKeyboard([
+        [
+          InlineKeyboardButton(
+              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
+        ]
+      ]),
+    );
   }
 }
 
 String generateAccountInfo(Account info) {
   final buffer = StringBuffer();
   buffer.writeln("⚡️ Энергия: *${info.energy}*");
-  buffer.writeln(
-      "❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
-  buffer.writeln(
-      "⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
+  buffer.writeln("❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
+  buffer.writeln("⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
   buffer.writeln("💰 Денег: *${info.hero.base.money}*");
   return buffer.toString();
 }
@@ -217,6 +224,11 @@ String generateAccountInfo(Account info) {
 Future<Map<String, String>> createHeaders(UserManager userManager) async {
   final sessions = await userManager.readUserSession();
   final session = sessions[0];
+  return createHeadersFromSession(session);
+}
+
+Future<Map<String, String>> createHeadersFromSession(
+    SessionInfo session) async {
   return {
     "Referer": apiUrl,
     "X-CSRFToken": session.csrfToken,
@@ -224,8 +236,3 @@ Future<Map<String, String>> createHeaders(UserManager userManager) async {
   };
 }
 
-Future processHeader(UserManager userManager, SessionInfo session) async {
-  print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
-
-  await userManager.saveUserSession(session);
-}

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room/action.dart';
+import 'package:epictale_telegram/room/action_router.dart';
 import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
@@ -60,7 +61,26 @@ class Room {
   }
 
   Future<void> _processMessage(String message) async {
-    final action = _actionRouter.route(message);
-    await action.apply();
+    final actionAccount = processMessage(message.trim());
+
+    final action = _actionRouter.route(actionAccount.action);
+    await action.apply(account: actionAccount.account);
   }
+}
+
+ActionAccount processMessage(String message) {
+  final exp = RegExp(r"(\/\w+)\s*(\w+)*");
+  final groups = exp.firstMatch(message);
+  
+  return ActionAccount(
+    groups.group(1),
+    groups.group(2),
+  );
+}
+
+class ActionAccount {
+  final String action;
+  final String account;
+
+  ActionAccount(this.action, this.account);
 }

@@ -30,6 +30,22 @@ void main() {
     verify(taleMock.apiInfo());
     verify(telegramMock.sendMessage(any));
   });
+
+  test('test message processing', () {
+    const message = "/help 123";
+    final actionAccount = processMessage(message);
+    
+    expect(actionAccount.action, "/help");
+    expect(actionAccount.account, "123");
+  });
+
+  test('test message without account', () {
+    const message = "/help";
+    final actionAccount = processMessage(message);
+
+    expect(actionAccount.action, "/help");
+    expect(actionAccount.account, null);
+  });
 }
 
 class UserManagerMock extends Mock implements UserManager {}
