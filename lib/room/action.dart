@@ -20,6 +20,7 @@ abstract class Action {
       if (e is String) {
         await trySendMessage(e);
       }
+      print(e);
       await trySendMessage(
           "Возникла ошибка. Попробуй переподключить аккаунт через /auth");
     }
