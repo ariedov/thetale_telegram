@@ -128,4 +128,12 @@ void main() {
     expect(status.status, "processing");
     expect(status.statusUrl, "/postponed-tasks/35657544/status");
   });
+  
+  test("test not authorized", () {
+    const payload = """{"status": "error", "error": "У Вас нет прав для проведения данной операции", "code": "common.login_required"}""";
+
+    final operation = convertOperation(json.decode(payload));
+    expect(operation.isError, true);
+    expect(operation.error, "У Вас нет прав для проведения данной операции");
+  });
 }

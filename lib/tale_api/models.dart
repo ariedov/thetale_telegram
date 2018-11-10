@@ -135,8 +135,10 @@ class Secondary {
 class PendingOperation {
   final String status;
   final String statusUrl;
+  final String error;
 
-  PendingOperation(this.status, this.statusUrl);
+  PendingOperation(this.status, this.statusUrl, this.error);
 
   bool get isProcessing => status == "processing";
+  bool get isError => status == "error";
 }

@@ -61,6 +61,6 @@ class Room {
 
   Future<void> _processMessage(String message) async {
     final action = _actionRouter.route(message);
-    await action.performAction();
+    await action.apply();
   }
 }

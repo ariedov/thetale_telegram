@@ -15,7 +15,6 @@ const String applicationInfo = "Телеграм бот для игры в ск�
 const String applicationDescription = "Телеграм бот для игры в сказку";
 
 class TaleApi {
-
   TaleApi();
 
   Future<SessionDataPair<ApiInfo>> apiInfo() async {
@@ -73,12 +72,16 @@ class TaleApi {
         "$apiUrl/$method?api_version=1.0&api_client=$applicationId-$appVersion",
         headers: headers);
 
-    return convertOperation(json.decode(response.body));
+    final operation = convertOperation(json.decode(response.body));
+    if (operation.isError) {
+      throw operation.error;
+    }
+    return operation;
   }
 
-  Future<PendingOperation> checkOperation(String pendingUrl, {Map<String, String> headers}) async {
-    final response =
-        await http.get("$apiUrl/$pendingUrl", headers: headers);
+  Future<PendingOperation> checkOperation(String pendingUrl,
+      {Map<String, String> headers}) async {
+    final response = await http.get("$apiUrl/$pendingUrl", headers: headers);
 
     return _processResponse(response.body, convertOperation);
   }

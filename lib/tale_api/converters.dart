@@ -138,6 +138,7 @@ PendingOperation convertOperation(dynamic json) {
   return PendingOperation(
     json["status"] as String,
     json["status_url"] as String,
+    json["error"] as String,
   );
 }
 

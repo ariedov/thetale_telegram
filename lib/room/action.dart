@@ -13,7 +13,18 @@ abstract class Action {
 
   Action(this._userManager, this._taleApi, this._telegramApi);
 
-  Future<void> performAction();
+  Future<void> apply() async {
+    try {
+      await _performAction();
+    } catch (e) {
+      if (e is String) {
+        await trySendMessage(e);
+      }
+      await trySendMessage("Возникла ошибка. Попробуй переподключить аккаунт через /auth");
+    }
+  }
+
+  Future<void> _performAction();
 
   TaleApi get taleApi => _taleApi;
   TelegramApi get telegramApi => _telegramApi;
@@ -35,7 +46,7 @@ class StartAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> performAction() async {
+  Future<void> _performAction() async {
     await trySendMessage("Привет, хранитель!");
 
     await _userManager.setAuthorized(authorized: false);
@@ -68,7 +79,7 @@ class ConfirmAuthAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> performAction() async {
+  Future<void> _performAction() async {
     final status =
         await taleApi.authStatus(headers: await createHeaders(_userManager));
 
@@ -101,7 +112,7 @@ class RequestAuthAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> performAction() async {
+  Future<void> _performAction() async {
     await _userManager.setAuthorized(authorized: false);
     final info = await taleApi.apiInfo();
     await processHeader(_userManager, info.sessionInfo, isAuthorized: false);
@@ -121,7 +132,7 @@ class InfoAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> performAction() async {
+  Future<void> _performAction() async {
     if (!await _userManager.isAuthorized()) {
       await trySendMessage(
           "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
@@ -139,7 +150,7 @@ class HelpAction extends Action {
       : super(userManager, taleApi, telegramApi);
 
   @override
-  Future<void> performAction() async {
+  Future<void> _performAction() async {
     if (!await _userManager.isAuthorized()) {
       await trySendMessage(
           "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
