@@ -49,9 +49,9 @@ class StartAction extends Action {
   Future<void> _performAction() async {
     await trySendMessage("Привет, хранитель!");
 
-    await _userManager.setAuthorized(authorized: false);
+    await _userManager.clearAll();
     final info = await taleApi.apiInfo();
-    await processHeader(_userManager, info.sessionInfo, isAuthorized: false);
+    await processHeader(_userManager, info.sessionInfo);
 
     await trySendMessage("""
         Версия игры ${info.data.gameVersion}. Сейчас попробую тебя авторизовать.
@@ -83,9 +83,8 @@ class ConfirmAuthAction extends Action {
     final status =
         await taleApi.authStatus(headers: await createHeaders(_userManager));
 
-    final isAuthorized = await _userManager.isAuthorized();
-    if (status.data.isAccepted && !isAuthorized) {
-      await processHeader(_userManager, status.sessionInfo, isAuthorized: true);
+    if (status.data.isAccepted) {
+      await processHeader(_userManager, status.sessionInfo);
     }
 
     if (status.data.isAccepted) {
@@ -113,9 +112,10 @@ class RequestAuthAction extends Action {
 
   @override
   Future<void> _performAction() async {
-    await _userManager.setAuthorized(authorized: false);
+    await _userManager.clearAll();
     final info = await taleApi.apiInfo();
-    await processHeader(_userManager, info.sessionInfo, isAuthorized: false);
+
+    await processHeader(_userManager, info.sessionInfo);
 
     final link = await taleApi.auth(headers: await createHeaders(_userManager));
     await trySendMessage(
@@ -133,7 +133,8 @@ class InfoAction extends Action {
 
   @override
   Future<void> _performAction() async {
-    if (!await _userManager.isAuthorized()) {
+    final sessions = await _userManager.readUserSession();
+    if (sessions.isEmpty) {
       await trySendMessage(
           "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
       return;
@@ -151,7 +152,8 @@ class HelpAction extends Action {
 
   @override
   Future<void> _performAction() async {
-    if (!await _userManager.isAuthorized()) {
+    final sessions = await _userManager.readUserSession();
+    if (sessions.isEmpty) {
       await trySendMessage(
           "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
       return;
@@ -213,7 +215,8 @@ String generateAccountInfo(Account info) {
 }
 
 Future<Map<String, String>> createHeaders(UserManager userManager) async {
-  final session = await userManager.readUserSession();
+  final sessions = await userManager.readUserSession();
+  final session = sessions[0];
   return {
     "Referer": apiUrl,
     "X-CSRFToken": session.csrfToken,
@@ -221,9 +224,8 @@ Future<Map<String, String>> createHeaders(UserManager userManager) async {
   };
 }
 
-Future processHeader(UserManager userManager, SessionInfo session,
-    {bool isAuthorized = true}) async {
+Future processHeader(UserManager userManager, SessionInfo session) async {
   print("csrftoken: ${session.csrfToken}. sessionId: ${session.sessionId}");
 
-  await userManager.saveUserSession(session, isAuthorized: isAuthorized);
+  await userManager.saveUserSession(session);
 }

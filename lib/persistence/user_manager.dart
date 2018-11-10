@@ -2,41 +2,37 @@ import 'dart:async';
 import 'package:mongo_dart/mongo_dart.dart';
 
 abstract class UserManager {
-  Future<void> saveUserSession(SessionInfo info, {bool isAuthorized});
+  Future<void> saveUserSession(SessionInfo info);
 
-  Future<SessionInfo> readUserSession();
+  Future<List<SessionInfo>> readUserSession();
 
-  Future<void> setAuthorized({bool authorized});
+  Future<void> clearSession(SessionInfo info);
 
-  Future<bool> isAuthorized();
+  Future<void> clearAll();
 }
 
 class MemoryUserManager implements UserManager {
   final int chatId;
-  final Map<int, SessionInfo> sessionInfo = {};
-  bool _isAuthorized = false;
+  final Map<int, List<SessionInfo>> sessionInfo = {};
 
   MemoryUserManager(this.chatId);
 
   @override
-  Future<SessionInfo> readUserSession() async {
+  Future<List<SessionInfo>> readUserSession() async {
     return sessionInfo[chatId];
   }
 
   @override
-  Future<void> saveUserSession(SessionInfo info, {bool isAuthorized}) async {
-    sessionInfo[chatId] = info;
-    _isAuthorized = isAuthorized;
+  Future<void> saveUserSession(SessionInfo info) async {
+    sessionInfo[chatId].add(info);
   }
 
   @override
-  Future<void> setAuthorized({bool authorized}) async {
-    _isAuthorized = authorized;
-  }
+  Future<void> clearSession(SessionInfo info) async {}
 
   @override
-  Future<bool> isAuthorized() async {
-    return _isAuthorized;
+  Future<void> clearAll() async {
+    sessionInfo[chatId] = [];
   }
 }
 
@@ -47,48 +43,53 @@ class MongoUserManager implements UserManager {
   MongoUserManager(this.chatId, this.db);
 
   @override
-  Future<SessionInfo> readUserSession() async {
+  Future<List<SessionInfo>> readUserSession() async {
     final rooms = db.collection("rooms");
     final data = await rooms.findOne(where.eq("chat_id", chatId));
 
-    return SessionInfo(
-      data["session_id"] as String,
-      data["csrf_token"] as String,
-    );
+    return [
+      SessionInfo(
+        data["session_id"] as String,
+        data["csrf_token"] as String,
+      )
+    ];
   }
 
   @override
-  Future<void> saveUserSession(SessionInfo info, {bool isAuthorized = true}) async {
+  Future<void> saveUserSession(SessionInfo info) async {
     final rooms = db.collection("rooms");
-    await rooms.remove(where.eq("chat_id", chatId));
+    final session = await rooms.findOne(where.eq("chat_id", chatId).and(where
+        .eq("session_id", info.sessionId)
+        .or(where.eq("csrf_token", info.csrfToken))));
+
+    if (session != null) {
+      session["session_id"] = info.sessionId;
+      session["csrf_token"] = info.csrfToken;
+
+      await rooms.save(session);
+      return;
+    }
+
     await rooms.insert({
       "chat_id": chatId,
       "session_id": info.sessionId,
-      "csrf_token": info.csrfToken,
-      "is_authorized": isAuthorized
+      "csrf_token": info.csrfToken
     });
   }
 
   @override
-  Future<void> setAuthorized({bool authorized}) async {
+  Future<void> clearAll() async {
     final rooms = db.collection("rooms");
-    final room = await rooms.findOne(where.eq("chat_id", chatId));
-    if (room != null) {
-      room["is_authorized"] = authorized;
-      await rooms.save(room);
-    } else {
-      await rooms.insert({
-        "chat_id": chatId,
-        "is_authorized": authorized
-      });
-    }
+    await rooms.remove(where.eq("chat_id", chatId));
   }
 
   @override
-  Future<bool> isAuthorized() async {
+  Future<void> clearSession(SessionInfo info) async {
     final rooms = db.collection("rooms");
-    final room = await rooms.findOne(where.eq("chat_id", chatId));
-    return room != null && room["is_authorized"] as bool;
+    await rooms.remove(where
+        .eq("chat_id", chatId)
+        .eq("csrf_token", info.csrfToken)
+        .eq("session_id", info.sessionId));
   }
 }
 
