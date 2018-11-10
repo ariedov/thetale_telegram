@@ -17,7 +17,7 @@ ThirdPartyStatus convertThirdPartyStatus(dynamic json) {
       json["next_url"] as String,
       json["account_id"] as int,
       json["account_name"] as String,
-      json["session_expire_at"] as double,
+      _getDouble(json["session_expire_at"]),
       json["state"] as int);
 }
 
@@ -54,7 +54,7 @@ Account convertAccount(dynamic json) {
   return Account(
       json["new_messages"] as int,
       json["id"] as int,
-      json["last_visit"] as double,
+      _getDouble(json["last_visit"]),
       json["is_own"] as bool,
       json["is_old"] as bool,
       convertHero(json["hero"]),
@@ -64,11 +64,11 @@ Account convertAccount(dynamic json) {
 
 Hero convertHero(dynamic json) {
   return Hero(
-    json["patch_turn"] as int,
+    _getInt(json["patch_turn"]),
     convertCompanion(json["companion"]),
     convertBase(json["base"]),
     convertSecondary(json["secondary"]),
-    json["diary"] as int,
+    _getInt(json["diary"]),
     json["messages"] as List<dynamic>,
     convertAction(json["action"]),
   );
@@ -80,29 +80,29 @@ Companion convertCompanion(dynamic json) {
   }
 
   return Companion(
-    json["type"] as int,
+    (json["type"] as num).toInt(),
     json["name"] as String,
-    json["health"] as int,
-    json["max_health"] as int,
-    json["experience"] as int,
-    json["experience_to_level"] as int,
-    json["coherence"] as int,
-    json["real_coherence"] as int,
+    _getInt(json["health"]),
+    _getInt(json["max_health"]),
+    _getInt(json["experience"]),
+    _getInt(json["experience_to_level"]),
+    _getInt(json["coherence"]),
+    _getInt(json["real_coherence"]),
   );
 }
 
 Base convertBase(dynamic json) {
   return Base(
-    json["experience"] as int,
-    json["race"] as int,
-    json["health"] as int,
+    _getInt(json["experience"]),
+    _getInt(json["race"]),
+    _getInt(json["health"]),
     json["name"] as String,
-    json["level"] as int,
-    json["gender"] as int,
-    json["experience_to_level"] as int,
-    json["max_health"] as int,
-    json["destiny_points"] as int,
-    json["money"] as int,
+    _getInt(json["level"]),
+    _getInt(json["gender"]),
+    _getInt(json["experience_to_level"]),
+    _getInt(json["max_health"]),
+    _getInt(json["destiny_points"]),
+    _getInt(json["money"]),
     json["alive"] as bool,
   );
 }
@@ -113,11 +113,11 @@ Secondary convertSecondary(dynamic json) {
   }
 
   return Secondary(
-    json["max_bag_size"] as int,
+    _getInt(json["max_bag_size"]),
     json["power"] as List<dynamic>,
-    json["move_speed"] as double,
-    json["loot_items_count"] as int,
-    json["initiative"] as double,
+    _getDouble(json["move_speed"]),
+    _getInt(json["loot_items_count"]),
+    _getDouble(json["initiative"]),
   );
 }
 
@@ -127,7 +127,7 @@ Action convertAction(dynamic json) {
   }
 
   return Action(
-    json["percents"] as double,
+    _getDouble(json["percents"]),
     json["description"] as String,
     json["info_link"] as String,
     json["type"] as int,
@@ -143,3 +143,17 @@ PendingOperation convertOperation(dynamic json) {
 }
 
 typedef Converter<T> = T Function(dynamic json);
+
+int _getInt(dynamic value) {
+  if (value != null && value is num) {
+    return value.toInt();
+  }
+  return 0;
+}
+
+double _getDouble(dynamic value) {
+  if (value != null && value is num) {
+    return value.toDouble();
+  }
+  return 0.0;
+}
