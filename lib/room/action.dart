@@ -86,7 +86,7 @@ class ConfirmAuthAction extends Action {
   Future<void> _performAction({String account}) async {
     final session = (await _userManager.readUserSession())
         .firstWhere((info) => info.sessionId == account);
-        
+
     final status = await taleApi.authStatus(
         headers: await createHeadersFromSession(session));
 
@@ -144,13 +144,31 @@ class InfoAction extends Action {
   @override
   Future<void> _performAction({String account}) async {
     final sessions = await _userManager.readUserSession();
+
     if (sessions.isEmpty) {
       await trySendMessage(
           "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
       return;
     }
-    final info =
-        await taleApi.gameInfo(headers: await createHeaders(_userManager));
+
+    final accountSession = sessions.firstWhere(
+        (session) => session.sessionId == account,
+        orElse: () => null);
+    if (accountSession == null && sessions.length > 1) {
+      await trySendMessage("Выбери о ком ты хочешь узнать.",
+          inlineKeyboard: InlineKeyboard(
+              [await buildAccountListAction(sessions, taleApi)]));
+      return;
+    }
+
+    Map<String, String> headers;
+    if (accountSession != null) {
+      headers = await createHeadersFromSession(accountSession);
+    } else {
+      headers = await createHeaders(_userManager);
+    }
+
+    final info = await taleApi.gameInfo(headers: headers);
     await trySendMessage(
         "${info.account.hero.base.name} ${info.account.hero.action?.description ?? ""}.\n${generateAccountInfo(info.account)}");
   }
@@ -163,13 +181,29 @@ class HelpAction extends Action {
   @override
   Future<void> _performAction({String account}) async {
     final sessions = await _userManager.readUserSession();
+
     if (sessions.isEmpty) {
       await trySendMessage(
           "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
       return;
     }
 
-    final headers = await createHeaders(_userManager);
+    final accountSession = sessions.firstWhere(
+        (session) => session.sessionId == account,
+        orElse: () => null);
+    if (accountSession == null && sessions.length > 1) {
+      await trySendMessage("Выбери кому ты хочешь помочь.",
+          inlineKeyboard: InlineKeyboard(
+              [await buildAccountListAction(sessions, taleApi)]));
+      return;
+    }
+
+    Map<String, String> headers;
+    if (accountSession != null) {
+      headers = await createHeadersFromSession(accountSession);
+    } else {
+      headers = await createHeaders(_userManager);
+    }
 
     final operation = await _taleApi.help(headers: headers);
     await trySendMessage("Пытаюсь помочь!");
@@ -201,7 +235,7 @@ class AddAccountAction extends Action {
     final link = await taleApi.auth(
         headers: await createHeadersFromSession(info.sessionInfo));
     await trySendMessage(
-      "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
+      "Чтобы добавить аккаунт - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
         [
           InlineKeyboardButton(
@@ -215,8 +249,10 @@ class AddAccountAction extends Action {
 String generateAccountInfo(Account info) {
   final buffer = StringBuffer();
   buffer.writeln("⚡️ Энергия: *${info.energy}*");
-  buffer.writeln("❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
-  buffer.writeln("⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
+  buffer.writeln(
+      "❤️ Жизнь: *${info.hero.base.health} / ${info.hero.base.maxHealth}*");
+  buffer.writeln(
+      "⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
   buffer.writeln("💰 Денег: *${info.hero.base.money}*");
   return buffer.toString();
 }
@@ -227,6 +263,22 @@ Future<Map<String, String>> createHeaders(UserManager userManager) async {
   return createHeadersFromSession(session);
 }
 
+Future<List<InlineKeyboardButton>> buildAccountListAction(
+    List<SessionInfo> sessions, TaleApi taleApi) async {
+  final List<InlineKeyboardButton> buttons = [];
+  for (final session in sessions) {
+    try {
+      final info = await taleApi.gameInfo(
+          headers: await createHeadersFromSession(session));
+      buttons.add(InlineKeyboardButton(
+          info.account.hero.base.name, "/help ${session.sessionId}"));
+    } catch (e) {
+      print(e);
+    }
+  }
+  return buttons;
+}
+
 Future<Map<String, String>> createHeadersFromSession(
     SessionInfo session) async {
   return {
@@ -235,4 +287,3 @@ Future<Map<String, String>> createHeadersFromSession(
     "Cookie": "csrftoken=${session.csrfToken}; sessionid=${session.sessionId}",
   };
 }
-
