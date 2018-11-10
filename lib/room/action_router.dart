@@ -24,6 +24,8 @@ class ActionRouter {
         return HelpAction(_userManager, _taleApi, _telegramApi);
       case "/add":
         return AddAccountAction(_userManager, _taleApi, _telegramApi);
+      case "/remove":
+        return RemoveAccountAction(_userManager, _taleApi, _telegramApi);
       default:
         throw "Action $action not supported";
     }

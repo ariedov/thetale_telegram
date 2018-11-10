@@ -41,13 +41,14 @@ String encodeKeyboard(ReplyKeyboard keyboard) {
 }
 
 String encodeInlineKeyboard(InlineKeyboard keyboard) {
-  return "{\"inline_keyboard\": [[${_mapKeyboardInline(keyboard)}]]}";
+  return "{\"inline_keyboard\": [${_mapKeyboardInline(keyboard)}]}";
 }
 
 String _mapKeyboardInline(InlineKeyboard keyboard) {
   final result = StringBuffer();
   for (var i = 0; i < keyboard.keyboard.length; ++i) {
     final row = keyboard.keyboard[i];
+    result.write("[");
     for (var j = 0; j < row.length; ++j) {
       final item = row[j];
       result.write("""{
@@ -58,7 +59,7 @@ String _mapKeyboardInline(InlineKeyboard keyboard) {
         result.write(",");
       }
     }
-
+    result.write("]");
     if (i < keyboard.keyboard.length - 1) {
       result.write(",");
     }

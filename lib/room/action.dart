@@ -156,8 +156,8 @@ class InfoAction extends Action {
         orElse: () => null);
     if (accountSession == null && sessions.length > 1) {
       await trySendMessage("Выбери о ком ты хочешь узнать.",
-          inlineKeyboard:
-              InlineKeyboard(await buildAccountListAction(sessions, taleApi, "/info")));
+          inlineKeyboard: InlineKeyboard(
+              await buildAccountListAction(sessions, taleApi, "/info")));
       return;
     }
 
@@ -246,6 +246,34 @@ class AddAccountAction extends Action {
   }
 }
 
+class RemoveAccountAction extends Action {
+  RemoveAccountAction(
+      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
+      : super(userManager, taleApi, telegramApi);
+
+  @override
+  Future<void> _performAction({String account}) async {
+    final sessions = await _userManager.readUserSession();
+
+    if (account == null) {
+      await trySendMessage(
+        "Выбери героя чтобы удалить.",
+        inlineKeyboard: InlineKeyboard(await buildAccountListAction(
+            sessions, taleApi, "/remove",
+            allowUnauthorized: true)),
+      );
+    } else {
+      final session = sessions.firstWhere((item) => item.sessionId == account,
+          orElse: () => null);
+      await _userManager.clearSession(session);
+
+      await trySendMessage(
+        "Сессия ${account} удалена.",
+      );
+    }
+  }
+}
+
 String generateAccountInfo(Account info) {
   final buffer = StringBuffer();
   buffer.writeln("⚡️ Энергия: *${info.energy}*");
@@ -264,15 +292,17 @@ Future<Map<String, String>> createHeaders(UserManager userManager) async {
 }
 
 Future<List<List<InlineKeyboardButton>>> buildAccountListAction(
-    List<SessionInfo> sessions, TaleApi taleApi, String action) async {
+    List<SessionInfo> sessions, TaleApi taleApi, String action,
+    {bool allowUnauthorized = false}) async {
   final List<List<InlineKeyboardButton>> buttons = [];
   for (final session in sessions) {
     final info = await taleApi.gameInfo(
         headers: await createHeadersFromSession(session));
-    if (info.account != null) {
+    if (info.account != null || allowUnauthorized) {
       buttons.add([
         InlineKeyboardButton(
-            info.account.hero.base.name, "$action ${session.sessionId}")
+            info.account?.hero?.base?.name ?? session.sessionId,
+            "$action ${session.sessionId}")
       ]);
     }
   }
