@@ -110,6 +110,7 @@ void main() {
     final encoded = encodeInlineKeyboard(keyboard);
     final decoded = json.decode(encoded);
     expect(decoded["inline_keyboard"][0][0]["text"], "text");
+    expect(decoded["inline_keyboard"][1][0]["text"], "text");
   });
 
   test("convert update with callback", () {
