@@ -56,14 +56,14 @@ class MongoUserManager implements UserManager {
   @override
   Future<List<SessionInfo>> readUserSession() async {
     final rooms = db.collection("rooms");
-    final data = await rooms.findOne(where.eq("chat_id", chatId));
+    final data = await rooms.find(where.eq("chat_id", chatId)).toList();
 
-    return [
-      SessionInfo(
-        data["session_id"] as String,
-        data["csrf_token"] as String,
-      )
-    ];
+    return data
+        .map((item) => SessionInfo(
+              item["session_id"] as String,
+              item["csrf_token"] as String,
+            ))
+        .toList();
   }
 
   @override

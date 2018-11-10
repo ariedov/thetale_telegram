@@ -84,8 +84,8 @@ class ConfirmAuthAction extends Action {
 
   @override
   Future<void> _performAction({String account}) async {
-    final session = (await _userManager.readUserSession())
-        .firstWhere((info) => info.sessionId == account);
+    final sessions = await _userManager.readUserSession();
+    final session = sessions.firstWhere((info) => info.sessionId == account);
 
     final status = await taleApi.authStatus(
         headers: await createHeadersFromSession(session));
@@ -156,8 +156,8 @@ class InfoAction extends Action {
         orElse: () => null);
     if (accountSession == null && sessions.length > 1) {
       await trySendMessage("Выбери о ком ты хочешь узнать.",
-          inlineKeyboard: InlineKeyboard(
-              [await buildAccountListAction(sessions, taleApi)]));
+          inlineKeyboard:
+              InlineKeyboard(await buildAccountListAction(sessions, taleApi, "/info")));
       return;
     }
 
@@ -194,7 +194,7 @@ class HelpAction extends Action {
     if (accountSession == null && sessions.length > 1) {
       await trySendMessage("Выбери кому ты хочешь помочь.",
           inlineKeyboard: InlineKeyboard(
-              [await buildAccountListAction(sessions, taleApi)]));
+              await buildAccountListAction(sessions, taleApi, "/help")));
       return;
     }
 
@@ -263,17 +263,17 @@ Future<Map<String, String>> createHeaders(UserManager userManager) async {
   return createHeadersFromSession(session);
 }
 
-Future<List<InlineKeyboardButton>> buildAccountListAction(
-    List<SessionInfo> sessions, TaleApi taleApi) async {
-  final List<InlineKeyboardButton> buttons = [];
+Future<List<List<InlineKeyboardButton>>> buildAccountListAction(
+    List<SessionInfo> sessions, TaleApi taleApi, String action) async {
+  final List<List<InlineKeyboardButton>> buttons = [];
   for (final session in sessions) {
-    try {
-      final info = await taleApi.gameInfo(
-          headers: await createHeadersFromSession(session));
-      buttons.add(InlineKeyboardButton(
-          info.account.hero.base.name, "/help ${session.sessionId}"));
-    } catch (e) {
-      print(e);
+    final info = await taleApi.gameInfo(
+        headers: await createHeadersFromSession(session));
+    if (info.account != null) {
+      buttons.add([
+        InlineKeyboardButton(
+            info.account.hero.base.name, "$action ${session.sessionId}")
+      ]);
     }
   }
   return buttons;

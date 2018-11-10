@@ -46,12 +46,21 @@ String encodeInlineKeyboard(InlineKeyboard keyboard) {
 
 String _mapKeyboardInline(InlineKeyboard keyboard) {
   final result = StringBuffer();
-  for (final row in keyboard.keyboard) {
-    for (final item in row) {
+  for (var i = 0; i < keyboard.keyboard.length; ++i) {
+    final row = keyboard.keyboard[i];
+    for (var j = 0; j < row.length; ++j) {
+      final item = row[j];
       result.write("""{
         "text": "${item.text}",
         "callback_data": "${item.callbackData}"
       }""");
+      if (j < row.length - 1) {
+        result.write(",");
+      }
+    }
+
+    if (i < keyboard.keyboard.length - 1) {
+      result.write(",");
     }
   }
   return result.toString();
