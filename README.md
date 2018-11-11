@@ -24,3 +24,15 @@ To run tests execute:
 ```bash
 pub run test test/
 ```
+
+## Command list
+
+/start - start the game
+/auth - clear all data and authorize
+/confirm - confirm authorization
+
+/add - add a new character
+/remove - remove a character
+
+/help - help your hero
+/info - get hero information
