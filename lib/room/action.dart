@@ -108,8 +108,7 @@ class ConfirmAuthAction extends Action {
       final gameInfo =
           await _taleApi.gameInfo(headers: await createHeaders(_userManager));
       await trySendMessage(
-          """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}
-      """);
+          """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}""");
     } else {
       await trySendMessage("Тебе стоит попытаться еще раз.");
     }
@@ -159,9 +158,16 @@ class InfoAction extends Action {
         (session) => session.sessionId == account,
         orElse: () => null);
     if (accountSession == null && sessions.length > 1) {
-      await trySendMessage("Выбери о ком ты хочешь узнать.",
-          inlineKeyboard: InlineKeyboard(
-              await buildAccountListAction(sessions, taleApi, "/info")));
+      final nameSessionMap = await getNameSessionMap(sessions, taleApi);
+
+      if (nameSessionMap.isNotEmpty) {
+        await trySendMessage("Выбери о ком ты хочешь узнать.",
+            inlineKeyboard: InlineKeyboard(
+                buildAccountListAction(nameSessionMap, "/info")));
+      } else {
+        await trySendMessage(
+            "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
+      }
       return;
     }
 
@@ -196,9 +202,16 @@ class HelpAction extends Action {
         (session) => session.sessionId == account,
         orElse: () => null);
     if (accountSession == null && sessions.length > 1) {
-      await trySendMessage("Выбери кому ты хочешь помочь.",
-          inlineKeyboard: InlineKeyboard(
-              await buildAccountListAction(sessions, taleApi, "/help")));
+      final nameSessionMap = await getNameSessionMap(sessions, taleApi);
+
+      if (nameSessionMap.isNotEmpty) {
+        await trySendMessage("Выбери кому ты хочешь помочь.",
+            inlineKeyboard: InlineKeyboard(
+                buildAccountListAction(nameSessionMap, "/help")));
+      } else {
+        await trySendMessage(
+            "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
+      }
       return;
     }
 
@@ -260,12 +273,19 @@ class RemoveAccountAction extends Action {
     final sessions = await _userManager.readUserSession();
 
     if (account == null) {
-      await trySendMessage(
-        "Выбери героя чтобы удалить.",
-        inlineKeyboard: InlineKeyboard(await buildAccountListAction(
-            sessions, taleApi, "/remove",
-            allowUnauthorized: true)),
-      );
+      final nameSessionMap =
+          await getNameSessionMap(sessions, taleApi, allowUnauthorized: true);
+
+      if (nameSessionMap.isNotEmpty) {
+        await trySendMessage(
+          "Выбери героя чтобы удалить.",
+          inlineKeyboard:
+              InlineKeyboard(buildAccountListAction(nameSessionMap, "/remove")),
+        );
+      } else {
+        await trySendMessage(
+            "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
+      }
     } else {
       final session = sessions.firstWhere((item) => item.sessionId == account,
           orElse: () => null);
@@ -295,22 +315,32 @@ Future<Map<String, String>> createHeaders(UserManager userManager) async {
   return createHeadersFromSession(session);
 }
 
-Future<List<List<InlineKeyboardButton>>> buildAccountListAction(
-    List<SessionInfo> sessions, TaleApi taleApi, String action,
-    {bool allowUnauthorized = false}) async {
+List<List<InlineKeyboardButton>> buildAccountListAction(
+    Map<String, String> nameSessionMap, String action) {
   final List<List<InlineKeyboardButton>> buttons = [];
+
+  for (final key in nameSessionMap.keys) {
+    buttons.add([InlineKeyboardButton(key, "$action ${nameSessionMap[key]}")]);
+  }
+  return buttons;
+}
+
+Future<Map<String, String>> getNameSessionMap(
+    List<SessionInfo> sessions, TaleApi taleApi,
+    {bool allowUnauthorized = false}) async {
+  final nameSessionMap = <String, String>{};
+
   for (final session in sessions) {
     final info = await taleApi.gameInfo(
         headers: await createHeadersFromSession(session));
+
     if (info.account != null || allowUnauthorized) {
-      buttons.add([
-        InlineKeyboardButton(
-            info.account?.hero?.base?.name ?? session.sessionId,
-            "$action ${session.sessionId}")
-      ]);
+      nameSessionMap[info.account?.hero?.base?.name ?? session.sessionId] =
+          session.sessionId;
     }
   }
-  return buttons;
+
+  return nameSessionMap;
 }
 
 Future<Map<String, String>> createHeadersFromSession(
