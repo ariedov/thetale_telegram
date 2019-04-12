@@ -7,11 +7,11 @@ import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 
 abstract class Action {
+  Action(this._userManager, this._taleApi, this._telegramApi);
+
   final UserManager _userManager;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
-
-  Action(this._userManager, this._taleApi, this._telegramApi);
 
   Future<void> apply({String account}) async {
     try {

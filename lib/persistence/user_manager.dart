@@ -14,10 +14,10 @@ abstract class UserManager {
 }
 
 class MemoryUserManager implements UserManager {
+  MemoryUserManager(this.chatId);
+
   final int chatId;
   final Map<int, List<SessionInfo>> sessionInfo = {};
-
-  MemoryUserManager(this.chatId);
 
   @override
   Future<List<SessionInfo>> readUserSession() async {
@@ -48,10 +48,10 @@ class MemoryUserManager implements UserManager {
 }
 
 class MongoUserManager implements UserManager {
+  MongoUserManager(this.chatId, this.db);
+
   final int chatId;
   final Db db;
-
-  MongoUserManager(this.chatId, this.db);
 
   @override
   Future<List<SessionInfo>> readUserSession() async {
@@ -107,16 +107,16 @@ class MongoUserManager implements UserManager {
 }
 
 class SessionInfo {
+  SessionInfo(this.sessionId, this.csrfToken);
+
   final String sessionId;
   final String csrfToken;
-
-  SessionInfo(this.sessionId, this.csrfToken);
 }
 
 class UserManagerProvider {
-  final Db _db;
-
   UserManagerProvider(this._db);
+
+  final Db _db;
 
   UserManager getUserManager(int chatId) {
     return MongoUserManager(chatId, _db);

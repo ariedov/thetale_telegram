@@ -124,8 +124,8 @@ SessionInfo readSessionInfo(String cookie) {
 }
 
 class SessionDataPair<T> {
+  SessionDataPair(this.sessionInfo, this.data);
+
   final SessionInfo sessionInfo;
   final T data;
-
-  SessionDataPair(this.sessionInfo, this.data);
 }

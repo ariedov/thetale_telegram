@@ -11,9 +11,9 @@ Future<void> setupWebHook(String url) async {
 }
 
 class TelegramApi {
-  final int chatId;
-
   TelegramApi(this.chatId);
+
+  final int chatId;
 
   Future<Message> sendMessage(String message,
       {ReplyKeyboard keyboard, InlineKeyboard inlineKeyboard}) async {

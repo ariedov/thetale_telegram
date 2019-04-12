@@ -4,11 +4,11 @@ import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 
 class ActionRouter {
+  ActionRouter(this._userManager, this._taleApi, this._telegramApi);
+
   final UserManager _userManager;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
-
-  ActionRouter(this._userManager, this._taleApi, this._telegramApi);
 
   Action route(String action) {
     switch (action) {

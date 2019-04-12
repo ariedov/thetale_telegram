@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
-import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/action_router.dart';
 import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 
 class RoomFactory {
-  final UserManagerProvider _userProvider;
+
   RoomFactory(this._userProvider);
+
+  final UserManagerProvider _userProvider;
 
   Room createRoom(int chatId) {
     final userManager = _userProvider.getUserManager(chatId);
@@ -21,10 +22,11 @@ class RoomFactory {
 }
 
 class RoomManager {
-  final Map<int, Room> _rooms = {};
-  final RoomFactory _roomFactory;
 
   RoomManager(this._roomFactory);
+
+  final Map<int, Room> _rooms = {};
+  final RoomFactory _roomFactory;
 
   Room getRoom(int chatId) {
     if (_rooms[chatId] != null) {
@@ -35,15 +37,16 @@ class RoomManager {
 }
 
 class Room {
+  
+  Room(this._userManager, this._taleApi, this._telegramApi) {
+    _actionRouter = ActionRouter(_userManager, _taleApi, _telegramApi);
+  }
+
   final UserManager _userManager;
   final TaleApi _taleApi;
   final TelegramApi _telegramApi;
 
   ActionRouter _actionRouter;
-
-  Room(this._userManager, this._taleApi, this._telegramApi) {
-    _actionRouter = ActionRouter(_userManager, _taleApi, _telegramApi);
-  }
 
   /// This method will call both telegram and tale api
   Future processUpdate(Update update) async {
@@ -79,8 +82,8 @@ ActionAccount processMessage(String message) {
 }
 
 class ActionAccount {
+  ActionAccount(this.action, this.account);
+
   final String action;
   final String account;
-
-  ActionAccount(this.action, this.account);
 }

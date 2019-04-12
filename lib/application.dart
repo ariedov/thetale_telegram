@@ -27,9 +27,9 @@ class Application {
       final roomFactory = RoomFactory(userProvider);
       final roomManager = RoomManager(roomFactory);
 
-      await for (String data in server.listen()) {
+      await for (var data in server.listen()) {
         print(data);
-        final update = convertUpdate(json.decode(data));
+        final update = convertUpdate(json.decode(data as String));
         final room = roomManager.getRoom(update.chatId);
 
         processRoom(room, update);
