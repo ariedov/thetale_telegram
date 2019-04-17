@@ -53,6 +53,8 @@ abstract class MultiUserAction extends TelegramAction {
 
   Future<void> performChooserAction(Map<String, String> nameSessionMap);
 
+  Future<void> performEmptyAction();
+
   List<List<InlineKeyboardButton>> buildAccountListAction(
       Map<String, String> nameSessionMap, String action) {
     final List<List<InlineKeyboardButton>> buttons = [];

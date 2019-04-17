@@ -70,9 +70,14 @@ class Room {
     final actionAccount = processMessage(message.trim());
 
     final action = _actionRouter.route(actionAccount.action);
-    final sessions = await _userManager.readUserSession();
+    final sessions = await _userManager.readUserSession() ?? [];
 
     if (action is MultiUserAction) {
+      if (sessions.isEmpty) {
+        await action.performEmptyAction();
+        return;
+      }
+
       final accountSession = sessions.firstWhere(
           (session) => session.sessionId == actionAccount.account,
           orElse: () => null);
@@ -84,7 +89,7 @@ class Room {
       }
     } else {
       await applyAction(
-          sessions != null && sessions.isNotEmpty ? sessions[0] : null,
+          sessions.isNotEmpty ? sessions[0] : null,
           action,
           actionAccount.account);
     }

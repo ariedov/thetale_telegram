@@ -26,9 +26,9 @@ class ActionRouter {
       case ConfirmAuthAction.name:
         return ConfirmAuthAction(_taleApi, _telegramApi);
       case InfoAction.name:
-        return InfoAction(_userManager, _taleApi, _telegramApi);
+        return InfoAction(_taleApi, _telegramApi);
       case HelpAction.name:
-        return HelpAction(_userManager, _taleApi, _telegramApi);
+        return HelpAction(_taleApi, _telegramApi);
       case AddAccountAction.name:
         return AddAccountAction(_taleApi, _telegramApi);
       case RemoveAccountAction.name:

@@ -7,23 +7,13 @@ import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class HelpAction extends MultiUserAction {
-  HelpAction(this._userManager, TaleApiWrapper taleApi, TelegramApi telegramApi)
+  HelpAction(TaleApiWrapper taleApi, TelegramApi telegramApi)
       : super(taleApi, telegramApi);
 
   static const String name = "/help";
 
-  final UserManager _userManager;
-
   @override
   Future<void> performAction({String account}) async {
-    final sessions = await _userManager.readUserSession();
-
-    if (sessions.isEmpty) {
-      await trySendMessage(
-          "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
-      return;
-    }
-
     final operation = await taleApi.help();
     await trySendMessage("Пытаюсь помочь!");
 
@@ -49,5 +39,11 @@ class HelpAction extends MultiUserAction {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
     }
+  }
+
+  @override
+  Future<void> performEmptyAction() async {
+    await trySendMessage(
+        "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
   }
 }

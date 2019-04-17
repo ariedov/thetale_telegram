@@ -41,4 +41,9 @@ class RemoveAccountAction extends MultiUserAction {
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
     }
   }
+
+  @override
+  Future<void> performEmptyAction() {
+    return null;
+  }
 }
