@@ -1,20 +1,25 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
+import 'package:epictale_telegram/persistence/user_manager_provider.dart';
+import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/action_router.dart';
-import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:thetale_api/thetale_api.dart';
+
+const String apiUrl = "https://the-tale.org";
+const String applicationId = "epic_tale_telegram";
+const String appVersion = "0.0.1";
 
 class RoomFactory {
-
   RoomFactory(this._userProvider);
 
   final UserManagerProvider _userProvider;
 
   Room createRoom(int chatId) {
     final userManager = _userProvider.getUserManager(chatId);
-    final taleApi = TaleApi();
+    final taleApi = WrapperBuilder().build(apiUrl, applicationId, appVersion);
     final telegramApi = TelegramApi(chatId);
 
     return Room(userManager, taleApi, telegramApi);
@@ -22,7 +27,6 @@ class RoomFactory {
 }
 
 class RoomManager {
-
   RoomManager(this._roomFactory);
 
   final Map<int, Room> _rooms = {};
@@ -37,13 +41,12 @@ class RoomManager {
 }
 
 class Room {
-  
   Room(this._userManager, this._taleApi, this._telegramApi) {
     _actionRouter = ActionRouter(_userManager, _taleApi, _telegramApi);
   }
 
   final UserManager _userManager;
-  final TaleApi _taleApi;
+  final TaleApiWrapper _taleApi;
   final TelegramApi _telegramApi;
 
   ActionRouter _actionRouter;
@@ -67,14 +70,55 @@ class Room {
     final actionAccount = processMessage(message.trim());
 
     final action = _actionRouter.route(actionAccount.action);
-    await action.apply(account: actionAccount.account);
+    final sessions = await _userManager.readUserSession();
+
+    if (action is MultiUserAction) {
+      final accountSession = sessions.firstWhere(
+          (session) => session.sessionId == actionAccount.account,
+          orElse: () => null);
+      if (accountSession == null && sessions.length > 1) {
+        final nameSessionMap = await _getNameSessionMap(sessions, _taleApi);
+        await action.performChooserAction(nameSessionMap);
+      } else {
+        await applyAction(accountSession, action, actionAccount.account);
+      }
+    } else {
+      await applyAction(
+          sessions != null && sessions.isNotEmpty ? sessions[0] : null,
+          action,
+          actionAccount.account);
+    }
+  }
+
+  Future<void> applyAction(
+      SessionInfo session, TelegramAction action, String account) async {
+    _taleApi.setStorage(UserSessionStorage(_userManager, session));
+
+    await action.apply(account: account);
+  }
+
+  Future<Map<String, String>> _getNameSessionMap(
+      List<SessionInfo> sessions, TaleApiWrapper taleApi,
+      {bool allowUnauthorized = false}) async {
+    final nameSessionMap = <String, String>{};
+
+    for (final session in sessions) {
+      final info = await taleApi.gameInfo();
+
+      if (info.account != null || allowUnauthorized) {
+        nameSessionMap[info.account?.hero?.base?.name ?? session.sessionId] =
+            session.sessionId;
+      }
+    }
+
+    return nameSessionMap;
   }
 }
 
 ActionAccount processMessage(String message) {
   final exp = RegExp(r"(\/\w+)\s*(\w+)*");
   final groups = exp.firstMatch(message);
-  
+
   return ActionAccount(
     groups.group(1),
     groups.group(2),

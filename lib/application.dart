@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:epictale_telegram/constants.dart';
-import 'package:epictale_telegram/persistence/user_manager.dart';
+import 'package:epictale_telegram/persistence/user_manager_provider.dart';
 import 'package:epictale_telegram/room.dart';
 import 'package:epictale_telegram/telegram_api/converters.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';

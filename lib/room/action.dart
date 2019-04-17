@@ -1,21 +1,25 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
-import 'package:epictale_telegram/tale_api/models.dart';
-import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:thetale_api/thetale_api.dart';
 
-abstract class Action {
-  Action(this._userManager, this._taleApi, this._telegramApi);
+const String apiUrl = "https://the-tale.org";
 
-  final UserManager _userManager;
-  final TaleApi _taleApi;
+const String applicationName = "Сказка в Телеграмме";
+const String applicationInfo = "Телеграм бот для игры в сказку";
+const String applicationDescription = "Телеграм бот для игры в сказку";
+
+abstract class TelegramAction {
+  TelegramAction(this._taleApi, this._telegramApi);
+
+  final TaleApiWrapper _taleApi;
   final TelegramApi _telegramApi;
 
   Future<void> apply({String account}) async {
     try {
-      await _performAction(account: account);
+      await performAction(account: account);
     } catch (e) {
       if (e is String) {
         await trySendMessage(e);
@@ -26,9 +30,9 @@ abstract class Action {
     }
   }
 
-  Future<void> _performAction({String account});
+  Future<void> performAction({String account});
 
-  TaleApi get taleApi => _taleApi;
+  TaleApiWrapper get taleApi => _taleApi;
   TelegramApi get telegramApi => _telegramApi;
 
   Future<Message> trySendMessage(String message,
@@ -43,258 +47,21 @@ abstract class Action {
   }
 }
 
-class StartAction extends Action {
-  StartAction(UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
+abstract class MultiUserAction extends TelegramAction {
+  MultiUserAction(TaleApiWrapper taleApi, TelegramApi telegramApi)
+      : super(taleApi, telegramApi);
 
-  @override
-  Future<void> _performAction({String account}) async {
-    await trySendMessage("Привет, хранитель!");
+  Future<void> performChooserAction(Map<String, String> nameSessionMap);
 
-    await _userManager.clearAll();
-    final info = await taleApi.apiInfo();
-    await _userManager.addUserSession(info.sessionInfo);
+  List<List<InlineKeyboardButton>> buildAccountListAction(
+      Map<String, String> nameSessionMap, String action) {
+    final List<List<InlineKeyboardButton>> buttons = [];
 
-    await trySendMessage("""
-        Версия игры ${info.data.gameVersion}. Сейчас попробую тебя авторизовать.
-        /start - начать все по новой
-        /auth - снова авторизироваться
-        /confirm - подтвердить авторизацию после того как дал доступ боту (мне)
-
-        /add - добавить персонажа
-        /remove - удалить персонажа
-
-        /help - помочь своему герою
-        /info - получить информацию о герое
-        """);
-
-    final link = await taleApi.auth(headers: await createHeaders(_userManager));
-    await trySendMessage(
-      "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
-      inlineKeyboard: InlineKeyboard([
-        [
-          InlineKeyboardButton(
-              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
-        ]
-      ]),
-    );
-  }
-}
-
-class ConfirmAuthAction extends Action {
-  ConfirmAuthAction(
-      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
-
-  @override
-  Future<void> _performAction({String account}) async {
-    final sessions = await _userManager.readUserSession();
-    final session = sessions.firstWhere((info) => info.sessionId == account);
-
-    final status = await taleApi.authStatus(
-        headers: await createHeadersFromSession(session));
-
-    if (status.data.isAccepted) {
-      await _userManager.saveUserSession(status.sessionInfo);
+    for (final key in nameSessionMap.keys) {
+      buttons
+          .add([InlineKeyboardButton(key, "$action ${nameSessionMap[key]}")]);
     }
-
-    if (status.data.isAccepted) {
-      await trySendMessage("Ну привет, ${status.data.accountName}.",
-          keyboard: ReplyKeyboard([
-            ["/help"],
-            ["/info"],
-          ]));
-
-      final gameInfo =
-          await _taleApi.gameInfo(headers: await createHeaders(_userManager));
-      await trySendMessage(
-          """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}""");
-    } else {
-      await trySendMessage("Тебе стоит попытаться еще раз.");
-    }
-  }
-}
-
-class RequestAuthAction extends Action {
-  RequestAuthAction(
-      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
-
-  @override
-  Future<void> _performAction({String account}) async {
-    await _userManager.clearAll();
-    final info = await taleApi.apiInfo();
-
-    await _userManager.addUserSession(info.sessionInfo);
-
-    final link = await taleApi.auth(headers: await createHeaders(_userManager));
-    await trySendMessage(
-      "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
-      inlineKeyboard: InlineKeyboard([
-        [
-          InlineKeyboardButton(
-              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
-        ]
-      ]),
-    );
-  }
-}
-
-class InfoAction extends Action {
-  InfoAction(UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
-
-  @override
-  Future<void> _performAction({String account}) async {
-    final sessions = await _userManager.readUserSession();
-
-    if (sessions.isEmpty) {
-      await trySendMessage(
-          "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
-      return;
-    }
-
-    final accountSession = sessions.firstWhere(
-        (session) => session.sessionId == account,
-        orElse: () => null);
-    if (accountSession == null && sessions.length > 1) {
-      final nameSessionMap = await getNameSessionMap(sessions, taleApi);
-
-      if (nameSessionMap.isNotEmpty) {
-        await trySendMessage("Выбери о ком ты хочешь узнать.",
-            inlineKeyboard: InlineKeyboard(
-                buildAccountListAction(nameSessionMap, "/info")));
-      } else {
-        await trySendMessage(
-            "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
-      }
-      return;
-    }
-
-    Map<String, String> headers;
-    if (accountSession != null) {
-      headers = await createHeadersFromSession(accountSession);
-    } else {
-      headers = await createHeaders(_userManager);
-    }
-
-    final info = await taleApi.gameInfo(headers: headers);
-    await trySendMessage(
-        "${info.account.hero.base.name} ${info.account.hero.action?.description ?? ""}.\n${generateAccountInfo(info.account)}");
-  }
-}
-
-class HelpAction extends Action {
-  HelpAction(UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
-
-  @override
-  Future<void> _performAction({String account}) async {
-    final sessions = await _userManager.readUserSession();
-
-    if (sessions.isEmpty) {
-      await trySendMessage(
-          "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start.");
-      return;
-    }
-
-    final accountSession = sessions.firstWhere(
-        (session) => session.sessionId == account,
-        orElse: () => null);
-    if (accountSession == null && sessions.length > 1) {
-      final nameSessionMap = await getNameSessionMap(sessions, taleApi);
-
-      if (nameSessionMap.isNotEmpty) {
-        await trySendMessage("Выбери кому ты хочешь помочь.",
-            inlineKeyboard: InlineKeyboard(
-                buildAccountListAction(nameSessionMap, "/help")));
-      } else {
-        await trySendMessage(
-            "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
-      }
-      return;
-    }
-
-    Map<String, String> headers;
-    if (accountSession != null) {
-      headers = await createHeadersFromSession(accountSession);
-    } else {
-      headers = await createHeaders(_userManager);
-    }
-
-    final operation = await _taleApi.help(headers: headers);
-    await trySendMessage("Пытаюсь помочь!");
-
-    Timer.periodic(Duration(seconds: 1), (timer) async {
-      final status =
-          await taleApi.checkOperation(operation.statusUrl, headers: headers);
-      if (!status.isProcessing) {
-        timer.cancel();
-
-        final gameInfo = await taleApi.gameInfo(headers: headers);
-        await trySendMessage(
-            "${gameInfo.account.hero.base.name} рад помощи и ${gameInfo.account.hero.action?.description ?? ""}.\n${generateAccountInfo(gameInfo.account)}");
-      }
-    });
-  }
-}
-
-class AddAccountAction extends Action {
-  AddAccountAction(
-      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
-
-  @override
-  Future<void> _performAction({String account}) async {
-    final info = await taleApi.apiInfo();
-    await _userManager.addUserSession(info.sessionInfo);
-
-    final link = await taleApi.auth(
-        headers: await createHeadersFromSession(info.sessionInfo));
-    await trySendMessage(
-      "Чтобы добавить аккаунт - перейди по ссылке ${apiUrl}${link.authorizationPage}",
-      inlineKeyboard: InlineKeyboard([
-        [
-          InlineKeyboardButton(
-              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
-        ]
-      ]),
-    );
-  }
-}
-
-class RemoveAccountAction extends Action {
-  RemoveAccountAction(
-      UserManager userManager, TaleApi taleApi, TelegramApi telegramApi)
-      : super(userManager, taleApi, telegramApi);
-
-  @override
-  Future<void> _performAction({String account}) async {
-    final sessions = await _userManager.readUserSession();
-
-    if (account == null) {
-      final nameSessionMap =
-          await getNameSessionMap(sessions, taleApi, allowUnauthorized: true);
-
-      if (nameSessionMap.isNotEmpty) {
-        await trySendMessage(
-          "Выбери героя чтобы удалить.",
-          inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(nameSessionMap, "/remove")),
-        );
-      } else {
-        await trySendMessage(
-            "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
-      }
-    } else {
-      final session = sessions.firstWhere((item) => item.sessionId == account,
-          orElse: () => null);
-      await _userManager.clearSession(session);
-
-      await trySendMessage(
-        "Сессия ${account} удалена.",
-      );
-    }
+    return buttons;
   }
 }
 
@@ -307,47 +74,4 @@ String generateAccountInfo(Account info) {
       "⭐️ Опыт: *${info.hero.base.experience} / ${info.hero.base.experienceToLevel}*");
   buffer.writeln("💰 Денег: *${info.hero.base.money}*");
   return buffer.toString();
-}
-
-Future<Map<String, String>> createHeaders(UserManager userManager) async {
-  final sessions = await userManager.readUserSession();
-  final session = sessions[0];
-  return createHeadersFromSession(session);
-}
-
-List<List<InlineKeyboardButton>> buildAccountListAction(
-    Map<String, String> nameSessionMap, String action) {
-  final List<List<InlineKeyboardButton>> buttons = [];
-
-  for (final key in nameSessionMap.keys) {
-    buttons.add([InlineKeyboardButton(key, "$action ${nameSessionMap[key]}")]);
-  }
-  return buttons;
-}
-
-Future<Map<String, String>> getNameSessionMap(
-    List<SessionInfo> sessions, TaleApi taleApi,
-    {bool allowUnauthorized = false}) async {
-  final nameSessionMap = <String, String>{};
-
-  for (final session in sessions) {
-    final info = await taleApi.gameInfo(
-        headers: await createHeadersFromSession(session));
-
-    if (info.account != null || allowUnauthorized) {
-      nameSessionMap[info.account?.hero?.base?.name ?? session.sessionId] =
-          session.sessionId;
-    }
-  }
-
-  return nameSessionMap;
-}
-
-Future<Map<String, String>> createHeadersFromSession(
-    SessionInfo session) async {
-  return {
-    "Referer": apiUrl,
-    "X-CSRFToken": session.csrfToken,
-    "Cookie": "csrftoken=${session.csrfToken}; sessionid=${session.sessionId}",
-  };
 }

@@ -1,10 +1,10 @@
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room.dart';
-import 'package:epictale_telegram/tale_api/tale_api.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:thetale_api/thetale_api.dart';
 
 void main() {
   test("test start", () async {
@@ -50,6 +50,6 @@ void main() {
 
 class UserManagerMock extends Mock implements UserManager {}
 
-class TaleApiMock extends Mock implements TaleApi {}
+class TaleApiMock extends Mock implements TaleApiWrapper {}
 
 class TelegramApiMock extends Mock implements TelegramApi {}

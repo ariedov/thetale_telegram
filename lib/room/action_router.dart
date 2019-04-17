@@ -1,30 +1,37 @@
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/tale_api/tale_api.dart';
+import 'package:epictale_telegram/room/add_account_action.dart';
+import 'package:epictale_telegram/room/confirm_auth_action.dart';
+import 'package:epictale_telegram/room/help_action.dart';
+import 'package:epictale_telegram/room/info_action.dart';
+import 'package:epictale_telegram/room/remove_account_action.dart';
+import 'package:epictale_telegram/room/request_auth_action.dart';
+import 'package:epictale_telegram/room/start_action.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:thetale_api/thetale_api.dart';
 
 class ActionRouter {
   ActionRouter(this._userManager, this._taleApi, this._telegramApi);
 
   final UserManager _userManager;
-  final TaleApi _taleApi;
+  final TaleApiWrapper _taleApi;
   final TelegramApi _telegramApi;
 
-  Action route(String action) {
+  TelegramAction route(String action) {
     switch (action) {
-      case "/start":
+      case StartAction.name:
         return StartAction(_userManager, _taleApi, _telegramApi);
-      case "/auth":
+      case RequestAuthAction.name:
         return RequestAuthAction(_userManager, _taleApi, _telegramApi);
-      case "/confirm":
-        return ConfirmAuthAction(_userManager, _taleApi, _telegramApi);
-      case "/info":
+      case ConfirmAuthAction.name:
+        return ConfirmAuthAction(_taleApi, _telegramApi);
+      case InfoAction.name:
         return InfoAction(_userManager, _taleApi, _telegramApi);
-      case "/help":
+      case HelpAction.name:
         return HelpAction(_userManager, _taleApi, _telegramApi);
-      case "/add":
-        return AddAccountAction(_userManager, _taleApi, _telegramApi);
-      case "/remove":
+      case AddAccountAction.name:
+        return AddAccountAction(_taleApi, _telegramApi);
+      case RemoveAccountAction.name:
         return RemoveAccountAction(_userManager, _taleApi, _telegramApi);
       default:
         throw "Action $action not supported";
