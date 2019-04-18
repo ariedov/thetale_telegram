@@ -37,3 +37,25 @@ class UserSessionStorage extends SessionStorage {
     await userManager.updateUserSession(sessionInfo);
   }
 }
+
+class ReadonlySessionStorage extends SessionStorage {
+  ReadonlySessionStorage(this.info);
+  
+  final SessionInfo info;
+
+  @override
+  Future<void> addSession(SessionInfo sessionInfo) {
+    throw "Cannot add session";
+  }
+
+  @override
+  Future<SessionInfo> readSession() async {
+    return info;
+  }
+
+  @override
+  Future<void> updateSession(SessionInfo sessionInfo) {
+    throw "Cannot update session";
+  }
+
+}

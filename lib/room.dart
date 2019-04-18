@@ -107,6 +107,7 @@ class Room {
     final nameSessionMap = <String, String>{};
 
     for (final session in sessions) {
+      taleApi.setStorage(ReadonlySessionStorage(session));
       final info = await taleApi.gameInfo();
 
       if (info.account != null || allowUnauthorized) {

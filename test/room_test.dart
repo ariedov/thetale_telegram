@@ -88,6 +88,39 @@ void main() {
     await room.processUpdate(update);
 
     verify(action.performChooserAction(any));
+    verify(taleMock.setStorage(any));
+  });
+
+  test('test process multi user action with first account with multiple available',
+      () async {
+    final update = createUpdateWithAction("/help session");
+    final action = MultiUserTelegramAction();
+
+    when(userManager.readUserSession()).thenAnswer((_) => Future(
+        () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
+    when(taleMock.gameInfo()).thenAnswer(
+        (_) => Future(() => createGameInfoWithCharacterName("character")));
+    when(routerMock.route("/help")).thenReturn(action);
+
+    await room.processUpdate(update);
+
+    verify(action.apply(account: "session"));
+  });
+
+  test('test process multi user action with second account with multiple available',
+      () async {
+    final update = createUpdateWithAction("/help second");
+    final action = MultiUserTelegramAction();
+
+    when(userManager.readUserSession()).thenAnswer((_) => Future(
+        () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
+    when(taleMock.gameInfo()).thenAnswer(
+        (_) => Future(() => createGameInfoWithCharacterName("character")));
+    when(routerMock.route("/help")).thenReturn(action);
+
+    await room.processUpdate(update);
+
+    verify(action.apply(account: "second"));
   });
 
   test('test process multi user action with account', () async {
