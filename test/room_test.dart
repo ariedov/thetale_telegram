@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room.dart';
+import 'package:epictale_telegram/room/action.dart';
+import 'package:epictale_telegram/room/action_router.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:thetale_api/thetale_api.dart';
@@ -11,23 +12,25 @@ import 'package:thetale_api/thetale_api.dart';
 void main() {
   UserManagerMock userManager;
   TaleApiMock taleMock;
-  TelegramApiMock telegramMock;
+  ActionRouterMock routerMock;
   Room room;
 
   setUp(() {
     userManager = UserManagerMock();
     taleMock = TaleApiMock();
-    telegramMock = TelegramApiMock();
+    routerMock = ActionRouterMock();
 
-    room = Room(userManager, taleMock, telegramMock);
+    room = Room(userManager, taleMock, routerMock);
   });
-  test("test start", () async {
+
+  test("test single user action", () async {
     final update = createUpdateWithAction("/start");
+    final action = SingleUserTelegramAction();
+    when(routerMock.route("/start")).thenReturn(action);
 
     await room.processUpdate(update);
 
-    verify(taleMock.apiInfo());
-    verify(telegramMock.sendMessage(any));
+    verify(action.apply(account: anyNamed("account")));
   });
 
   test('test message processing', () {
@@ -48,57 +51,69 @@ void main() {
 
   test('test process multi user action without accounts at all', () async {
     final update = createUpdateWithAction("/help");
+    final action = MultiUserTelegramAction();
+
+    when(routerMock.route("/help")).thenReturn(action);
 
     await room.processUpdate(update);
 
-    verify(telegramMock.sendMessage(any,
-        inlineKeyboard: anyNamed("inlineKeyboard")));
-    verifyNever(telegramMock.sendMessage(any));
+    verify(action.performEmptyAction());
   });
 
   test('test process multi user action without account with single available',
       () async {
+    final action = MultiUserTelegramAction();
+    final update = createUpdateWithAction("/help");
+
     when(userManager.readUserSession())
         .thenAnswer((_) => Future(() => [SessionInfo("session", "info")]));
+    when(routerMock.route("/help")).thenReturn(action);
 
-    final update = createUpdateWithAction("/help");
     await room.processUpdate(update);
 
-    verify(telegramMock.sendMessage("Пытаюсь помочь!"));
+    verify(action.apply(account: anyNamed("account")));
   });
 
   test('test process multi user action without account with multiple available',
       () async {
+    final update = createUpdateWithAction("/help");
+    final action = MultiUserTelegramAction();
+
     when(userManager.readUserSession()).thenAnswer((_) => Future(
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
+    when(routerMock.route("/help")).thenReturn(action);
 
-    final update = createUpdateWithAction("/help");
     await room.processUpdate(update);
 
-    verify(telegramMock.sendMessage("Выбери кому ты хочешь помочь.",
-        inlineKeyboard: anyNamed("inlineKeyboard")));
+    verify(action.performChooserAction(any));
   });
 
   test('test process multi user action with account', () async {
+    final update = createUpdateWithAction("/help session");
+    final action = MultiUserTelegramAction();
+
     when(userManager.readUserSession())
         .thenAnswer((_) => Future(() => [SessionInfo("session", "info")]));
-
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
+    when(routerMock.route("/help")).thenReturn(action);
 
-    final update = createUpdateWithAction("/help session");
     await room.processUpdate(update);
 
-    verify(telegramMock.sendMessage("Пытаюсь помочь!"));
+    verify(action.apply(account: "session"));
   });
 
   test('test process multi user action with empty session', () async {
     final update = createUpdateWithAction("/help session");
+    final action = MultiUserTelegramAction();
+
+    when(routerMock.route("/help")).thenReturn(action);
+
     await room.processUpdate(update);
 
-    verify(telegramMock.sendMessage("Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start."));
+    verify(action.performEmptyAction());
   });
 }
 
@@ -143,8 +158,12 @@ GameInfo createGameInfoWithCharacterName(String character) {
       null);
 }
 
+class SingleUserTelegramAction extends Mock implements TelegramAction {}
+
+class MultiUserTelegramAction extends Mock implements MultiUserAction {}
+
 class UserManagerMock extends Mock implements UserManager {}
 
 class TaleApiMock extends Mock implements TaleApiWrapper {}
 
-class TelegramApiMock extends Mock implements TelegramApi {}
+class ActionRouterMock extends Mock implements ActionRouter {}

@@ -21,8 +21,9 @@ class RoomFactory {
     final userManager = _userProvider.getUserManager(chatId);
     final taleApi = WrapperBuilder().build(apiUrl, applicationId, appVersion);
     final telegramApi = TelegramApi(chatId);
+    final actionRouter = ActionRouter(userManager, taleApi, telegramApi);
 
-    return Room(userManager, taleApi, telegramApi);
+    return Room(userManager, taleApi, actionRouter);
   }
 }
 
@@ -41,15 +42,11 @@ class RoomManager {
 }
 
 class Room {
-  Room(this._userManager, this._taleApi, this._telegramApi) {
-    _actionRouter = ActionRouter(_userManager, _taleApi, _telegramApi);
-  }
+  Room(this._userManager, this._taleApi, this._actionRouter);
 
   final UserManager _userManager;
   final TaleApiWrapper _taleApi;
-  final TelegramApi _telegramApi;
-
-  ActionRouter _actionRouter;
+  final ActionRouter _actionRouter;
 
   /// This method will call both telegram and tale api
   Future processUpdate(Update update) async {
