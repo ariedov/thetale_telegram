@@ -82,13 +82,15 @@ class Room {
         final nameSessionMap = await _getNameSessionMap(sessions, _taleApi);
         await action.performChooserAction(nameSessionMap);
       } else {
-        await applyAction(accountSession, action, actionAccount.account);
+        final resultSession = accountSession ?? sessions[0]; 
+        await applyAction(resultSession, action, resultSession.sessionId);
       }
     } else {
+      final resultSession = sessions.isNotEmpty ? sessions[0] : null;
       await applyAction(
-          sessions.isNotEmpty ? sessions[0] : null,
+          resultSession,
           action,
-          actionAccount.account);
+          resultSession?.sessionId);
     }
   }
 

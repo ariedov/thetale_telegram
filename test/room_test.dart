@@ -30,7 +30,7 @@ void main() {
 
     await room.processUpdate(update);
 
-    verify(action.apply(account: anyNamed("account")));
+    verify(action.apply(account: null));
   });
 
   test('test message processing', () {
@@ -71,7 +71,7 @@ void main() {
 
     await room.processUpdate(update);
 
-    verify(action.apply(account: anyNamed("account")));
+    verify(action.apply(account: "session"));
   });
 
   test('test process multi user action without account with multiple available',
