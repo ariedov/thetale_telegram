@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:thetale_api/thetale_api.dart';

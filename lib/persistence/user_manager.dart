@@ -14,23 +14,26 @@ abstract class UserManager {
 }
 
 class UserSessionStorage extends SessionStorage {
-  UserSessionStorage(this.userManager, this.sessionInfo);
+  UserSessionStorage(this.userManager, this._sessionInfo);
 
   final UserManager userManager;
-  final SessionInfo sessionInfo;
+  
+  SessionInfo _sessionInfo;
 
   @override
   Future<void> addSession(SessionInfo sessionInfo) async {
+    _sessionInfo = sessionInfo;
     await userManager.addUserSession(sessionInfo);
   }
 
   @override
   Future<SessionInfo> readSession() async {
-    return sessionInfo;
+    return _sessionInfo;
   }
 
   @override
   Future<void> updateSession(SessionInfo sessionInfo) async {
+    _sessionInfo = sessionInfo;
     await userManager.updateUserSession(sessionInfo);
   }
 }
