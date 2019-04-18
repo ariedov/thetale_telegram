@@ -35,7 +35,7 @@ class UserSessionStorage extends SessionStorage {
   Future<void> updateSession(SessionInfo sessionInfo) async {
     _sessionInfo = SessionInfo(sessionInfo.sessionId ?? _sessionInfo.sessionId,
         sessionInfo.csrfToken ?? _sessionInfo.csrfToken);
-    await userManager.updateUserSession(sessionInfo);
+    await userManager.updateUserSession(_sessionInfo);
   }
 }
 
