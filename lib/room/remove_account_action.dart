@@ -29,12 +29,12 @@ class RemoveAccountAction extends MultiUserAction {
   }
 
   @override
-  Future<void> performChooserAction(Map<String, String> nameSessionMap) async {
-    if (nameSessionMap.isNotEmpty) {
+  Future<void> performChooserAction(Map<String, String> sessionNameMap) async {
+    if (sessionNameMap.isNotEmpty) {
       await trySendMessage(
         "Выбери героя чтобы удалить.",
         inlineKeyboard:
-            InlineKeyboard(buildAccountListAction(nameSessionMap, "/remove")),
+            InlineKeyboard(buildAccountListAction(sessionNameMap, "/remove")),
       );
     } else {
       await trySendMessage(

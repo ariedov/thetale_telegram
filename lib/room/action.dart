@@ -50,17 +50,17 @@ abstract class MultiUserAction extends TelegramAction {
   MultiUserAction(TaleApiWrapper taleApi, TelegramApi telegramApi)
       : super(taleApi, telegramApi);
 
-  Future<void> performChooserAction(Map<String, String> nameSessionMap);
+  Future<void> performChooserAction(Map<String, String> sessionNameMap);
 
   Future<void> performEmptyAction();
 
   List<List<InlineKeyboardButton>> buildAccountListAction(
-      Map<String, String> nameSessionMap, String action) {
+      Map<String, String> sessionNameMap, String action) {
     final List<List<InlineKeyboardButton>> buttons = [];
 
-    for (final key in nameSessionMap.keys) {
+    for (final entry in sessionNameMap.entries) {
       buttons
-          .add([InlineKeyboardButton(key, "$action ${nameSessionMap[key]}")]);
+          .add([InlineKeyboardButton(entry.value, "$action ${entry.key}")]);
     }
     return buttons;
   }

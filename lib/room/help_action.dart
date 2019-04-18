@@ -29,11 +29,11 @@ class HelpAction extends MultiUserAction {
   }
 
   @override
-  Future<void> performChooserAction(Map<String, String> nameSessionMap) async {
-    if (nameSessionMap.isNotEmpty) {
+  Future<void> performChooserAction(Map<String, String> sessionNameMap) async {
+    if (sessionNameMap.isNotEmpty) {
       await trySendMessage("Выбери кому ты хочешь помочь.",
           inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(nameSessionMap, "/help")));
+              InlineKeyboard(buildAccountListAction(sessionNameMap, "/help")));
     } else {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");

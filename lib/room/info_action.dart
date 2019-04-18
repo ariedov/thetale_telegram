@@ -19,11 +19,11 @@ class InfoAction extends MultiUserAction {
   }
 
   @override
-  Future<void> performChooserAction(Map<String, String> nameSessionMap) async {
-    if (nameSessionMap.isNotEmpty) {
+  Future<void> performChooserAction(Map<String, String> sessionNameMap) async {
+    if (sessionNameMap.isNotEmpty) {
       await trySendMessage("Выбери о ком ты хочешь узнать.",
           inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(nameSessionMap, "/info")));
+              InlineKeyboard(buildAccountListAction(sessionNameMap, "/info")));
     } else {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");

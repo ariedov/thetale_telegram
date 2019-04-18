@@ -69,28 +69,25 @@ class Room {
     final action = _actionRouter.route(actionAccount.action);
     final sessions = await _userManager.readUserSession() ?? [];
 
+    final accountSession = sessions.firstWhere(
+        (session) => session.sessionId == actionAccount.account,
+        orElse: () => null);
     if (action is MultiUserAction) {
       if (sessions.isEmpty) {
         await action.performEmptyAction();
         return;
       }
 
-      final accountSession = sessions.firstWhere(
-          (session) => session.sessionId == actionAccount.account,
-          orElse: () => null);
       if (accountSession == null && sessions.length > 1) {
-        final nameSessionMap = await _getNameSessionMap(sessions, _taleApi);
-        await action.performChooserAction(nameSessionMap);
+        final sessionNameMap = await _getSessionNameMap(sessions, _taleApi);
+        await action.performChooserAction(sessionNameMap);
       } else {
-        final resultSession = accountSession ?? sessions[0]; 
+        final resultSession = accountSession ?? sessions[0];
         await applyAction(resultSession, action, resultSession.sessionId);
       }
     } else {
-      final resultSession = sessions.isNotEmpty ? sessions[0] : null;
-      await applyAction(
-          resultSession,
-          action,
-          resultSession?.sessionId);
+      final resultSession = accountSession ?? (sessions.isNotEmpty ? sessions[0] : null);
+      await applyAction(resultSession, action, resultSession?.sessionId);
     }
   }
 
@@ -101,22 +98,21 @@ class Room {
     await action.apply(account: account);
   }
 
-  Future<Map<String, String>> _getNameSessionMap(
+  Future<Map<String, String>> _getSessionNameMap(
       List<SessionInfo> sessions, TaleApiWrapper taleApi,
       {bool allowUnauthorized = false}) async {
-    final nameSessionMap = <String, String>{};
+    final sessionNameMap = <String, String>{};
 
     for (final session in sessions) {
       taleApi.setStorage(ReadonlySessionStorage(session));
       final info = await taleApi.gameInfo();
 
       if (info.account != null || allowUnauthorized) {
-        nameSessionMap[info.account?.hero?.base?.name ?? session.sessionId] =
-            session.sessionId;
+        sessionNameMap[session.sessionId] = info.account?.hero?.base?.name ?? session.sessionId;
       }
     }
 
-    return nameSessionMap;
+    return sessionNameMap;
   }
 }
 

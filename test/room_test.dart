@@ -91,7 +91,8 @@ void main() {
     verify(taleMock.setStorage(any));
   });
 
-  test('test process multi user action with first account with multiple available',
+  test(
+      'test process multi user action with first account with multiple available',
       () async {
     final update = createUpdateWithAction("/help session");
     final action = MultiUserTelegramAction();
@@ -107,7 +108,8 @@ void main() {
     verify(action.apply(account: "session"));
   });
 
-  test('test process multi user action with second account with multiple available',
+  test(
+      'test process multi user action with second account with multiple available',
       () async {
     final update = createUpdateWithAction("/help second");
     final action = MultiUserTelegramAction();
@@ -147,6 +149,43 @@ void main() {
     await room.processUpdate(update);
 
     verify(action.performEmptyAction());
+  });
+
+  test('test process first user action with multiple sessions', () async {
+    final update = createUpdateWithAction("/confirm session");
+    final action = SingleUserTelegramAction();
+
+    when(userManager.readUserSession())
+        .thenAnswer((_) => Future(() => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
+    when(routerMock.route("/confirm")).thenReturn(action);
+
+    await room.processUpdate(update);
+
+    verify(action.apply(account: "session"));
+  });
+
+  test('test process second user action with multiple sessions', () async {
+    final update = createUpdateWithAction("/confirm second");
+    final action = SingleUserTelegramAction();
+
+    when(userManager.readUserSession())
+        .thenAnswer((_) => Future(() => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
+    when(routerMock.route("/confirm")).thenReturn(action);
+
+    await room.processUpdate(update);
+
+    verify(action.apply(account: "second"));
+  });
+
+  test('test process second user action with multiple sessions', () async {
+    final update = createUpdateWithAction("/confirm session");
+    final action = SingleUserTelegramAction();
+
+    when(routerMock.route("/confirm")).thenReturn(action);
+
+    await room.processUpdate(update);
+
+    verify(action.apply(account: null));
   });
 }
 
