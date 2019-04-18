@@ -17,7 +17,8 @@ class AddAccountAction extends TelegramAction {
   Future<void> performAction({String account}) async {
     final info = await taleApi.apiInfo();
 
-    final link = await taleApi.auth();
+    final link = await taleApi.auth(
+      applicationName, applicationInfo, applicationDescription);
     await trySendMessage(
       "Чтобы добавить аккаунт - перейди по ссылке ${apiUrl}${link.authorizationPage}",
       inlineKeyboard: InlineKeyboard([
