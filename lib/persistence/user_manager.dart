@@ -17,7 +17,7 @@ class UserSessionStorage extends SessionStorage {
   UserSessionStorage(this.userManager, this._sessionInfo);
 
   final UserManager userManager;
-  
+
   SessionInfo _sessionInfo;
 
   @override
@@ -33,14 +33,15 @@ class UserSessionStorage extends SessionStorage {
 
   @override
   Future<void> updateSession(SessionInfo sessionInfo) async {
-    _sessionInfo = sessionInfo;
+    _sessionInfo = SessionInfo(sessionInfo.sessionId ?? _sessionInfo.sessionId,
+        sessionInfo.csrfToken ?? _sessionInfo.csrfToken);
     await userManager.updateUserSession(sessionInfo);
   }
 }
 
 class ReadonlySessionStorage extends SessionStorage {
   ReadonlySessionStorage(this.info);
-  
+
   final SessionInfo info;
 
   @override
@@ -57,5 +58,4 @@ class ReadonlySessionStorage extends SessionStorage {
   Future<void> updateSession(SessionInfo sessionInfo) {
     throw "Cannot update session";
   }
-
 }
