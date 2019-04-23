@@ -34,7 +34,7 @@ class ActionRouter {
       case RemoveAccountAction.name:
         return RemoveAccountAction(_userManager, _taleApi, _telegramApi);
       default:
-        throw "Action $action not supported";
+        throw Exception("Action $action not supported");
     }
   }
 }
