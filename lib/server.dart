@@ -7,7 +7,7 @@ class Server {
 
   Future<HttpServer> startServer({int port = 8080}) async {
     return _server = await HttpServer.bind(
-      "0.0.0.0",
+      InternetAddress.anyIPv4,
       port,
     );
   }
