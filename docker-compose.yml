@@ -1,17 +1,14 @@
 version: '3'
 
 services:
-  db:
+  mongo:
     image: mongo
-    volumes:
-      - ./data/db:/data/db
-    container_name: "mongodb"
     ports:
       - 27017:27017
-  epictale:
+  telegram:
     build: .
     command: dart bin/server.dart
     ports:
-      - "7070:8080"
+      - "8001:8080"
     depends_on:
-      - db
+      - mongo
