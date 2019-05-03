@@ -4,6 +4,7 @@ import 'package:epictale_telegram/room/add_account_action.dart';
 import 'package:epictale_telegram/room/confirm_auth_action.dart';
 import 'package:epictale_telegram/room/help_action.dart';
 import 'package:epictale_telegram/room/info_action.dart';
+import 'package:epictale_telegram/room/new_cards_action.dart';
 import 'package:epictale_telegram/room/remove_account_action.dart';
 import 'package:epictale_telegram/room/request_auth_action.dart';
 import 'package:epictale_telegram/room/start_action.dart';
@@ -63,6 +64,12 @@ void main() {
     final action = router.route("/help");
 
     expect(action, const TypeMatcher<HelpAction>());
+  });
+
+  test("test new cards action", () {
+    final action = router.route("/cardscount");
+
+    expect(action, const TypeMatcher<NewCardsAction>());
   });
 
   test("test wrong action", () {

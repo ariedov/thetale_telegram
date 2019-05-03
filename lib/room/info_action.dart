@@ -23,7 +23,7 @@ class InfoAction extends MultiUserAction {
     if (sessionNameMap.isNotEmpty) {
       await trySendMessage("Выбери о ком ты хочешь узнать.",
           inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(sessionNameMap, "/info")));
+              InlineKeyboard(buildAccountListAction(sessionNameMap, name)));
     } else {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");

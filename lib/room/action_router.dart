@@ -4,6 +4,7 @@ import 'package:epictale_telegram/room/add_account_action.dart';
 import 'package:epictale_telegram/room/confirm_auth_action.dart';
 import 'package:epictale_telegram/room/help_action.dart';
 import 'package:epictale_telegram/room/info_action.dart';
+import 'package:epictale_telegram/room/new_cards_action.dart';
 import 'package:epictale_telegram/room/remove_account_action.dart';
 import 'package:epictale_telegram/room/request_auth_action.dart';
 import 'package:epictale_telegram/room/start_action.dart';
@@ -33,6 +34,8 @@ class ActionRouter {
         return AddAccountAction(_taleApi, _telegramApi);
       case RemoveAccountAction.name:
         return RemoveAccountAction(_userManager, _taleApi, _telegramApi);
+      case NewCardsAction.name:
+        return NewCardsAction(_taleApi, _telegramApi);
       default:
         throw Exception("Action $action not supported");
     }
