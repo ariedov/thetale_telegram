@@ -13,3 +13,4 @@ Dart_Packages.xml
 .idea/
 *.aqueduct.pid
 data/
+.env

@@ -6,4 +6,4 @@ String get telegramWebhook => Platform.environment['WEBHOOK'] == null ? "https:/
 
 String get mongodbUri => Platform.environment['MONGO'] == null ? "mongodb://mongo:27017" : Platform.environment['MONGO'];
 
-String get token => "663762224:AAGYa7Hvu-s2aCANh08wwBg7LL17QvUkcno";
+String get token => Platform.environment['BOT_TOKEN'] == null ? "663762224:AAGYa7Hvu-s2aCANh08wwBg7LL17QvUkcno" : Platform.environment['BOT_TOKEN'];
