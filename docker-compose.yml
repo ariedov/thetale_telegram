@@ -11,5 +11,8 @@ services:
     container_name: ${CONTAINER_NAME}
     ports:
       - "${TARGET_PORT}:8080"
+    environment:
+      - MONGO=${MONGO}
+      - BOT_TOKEN=${BOT_TOKEN}
     depends_on:
       - mongo
