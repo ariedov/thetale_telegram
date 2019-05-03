@@ -14,5 +14,6 @@ services:
     environment:
       - MONGO=${MONGO}
       - BOT_TOKEN=${BOT_TOKEN}
+      - WEBHOOK=${WEBHOOK}
     depends_on:
       - mongo
