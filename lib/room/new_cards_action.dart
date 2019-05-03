@@ -16,7 +16,7 @@ class NewCardsAction extends MultiUserAction {
     
     if (cards.newCards > 0) {
         await trySendMessage(
-            "Для получения доступно ${cards.newCards} карт!", 
+            "Количество доступных карт: *${cards.newCards}*", 
               inlineKeyboard: InlineKeyboard([[
                 InlineKeyboardButton("Получить!", "/cardsclaim")
               ]]));
