@@ -18,7 +18,7 @@ class NewCardsAction extends MultiUserAction {
         await trySendMessage(
             "Количество доступных карт: *${cards.newCards}*", 
               inlineKeyboard: InlineKeyboard([[
-                InlineKeyboardButton("Получить!", "/cardsclaim")
+                InlineKeyboardButton("Получить!", "/cardsreceive ${account}")
               ]]));
     } else {
         await trySendMessage("Новых карт нет.");
@@ -35,7 +35,6 @@ class NewCardsAction extends MultiUserAction {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
     }
-
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:epictale_telegram/room/new_cards_action.dart';
+import 'package:epictale_telegram/room/cards/new_cards_action.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
