@@ -33,6 +33,8 @@ class StartAction extends TelegramAction {
 
         /help - помочь своему герою
         /info - получить информацию о герое
+
+        /cards - действия с картами
         """);
 
     final link = await taleApi.auth(

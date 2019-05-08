@@ -6,6 +6,9 @@ import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:http/http.dart' as http;
 
 Future<void> setupWebHook(String url) async {
+  print("Token: $token");
+  print("Webhook: $url");
+
   return http.post("https://api.telegram.org/bot$token/setWebhook",
       body: {"url": url});
 }

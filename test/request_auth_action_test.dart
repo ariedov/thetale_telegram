@@ -5,7 +5,7 @@ import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/request_auth_action.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test_api/test_api.dart';
+import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 void main() {

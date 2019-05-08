@@ -33,7 +33,7 @@ class HelpAction extends MultiUserAction {
     if (sessionNameMap.isNotEmpty) {
       await trySendMessage("Выбери кому ты хочешь помочь.",
           inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(sessionNameMap, "/help")));
+              InlineKeyboard(buildAccountListAction(sessionNameMap, name)));
     } else {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");

@@ -9,8 +9,9 @@ environment:
 dependencies:
   http: ^0.12.0
   mongo_dart: ^0.3.3
-  thetale_api: ^1.0.1
+  thetale_api: ^1.0.4
 
 dev_dependencies:
   test: ^1.0.0
   mockito: ^3.0.1
+  test_coverage: ^0.2.3

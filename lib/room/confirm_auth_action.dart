@@ -23,6 +23,8 @@ class ConfirmAuthAction extends TelegramAction {
             ["/info"],
           ]));
 
+      // TODO: remove "/confirm" button from previous message
+
       final gameInfo = await taleApi.gameInfo();
       await trySendMessage(
           """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}""");

@@ -1,6 +1,8 @@
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room/action_router.dart';
 import 'package:epictale_telegram/room/add_account_action.dart';
+import 'package:epictale_telegram/room/cards/new_cards_action.dart';
+import 'package:epictale_telegram/room/cards/receive_cards_action.dart';
 import 'package:epictale_telegram/room/confirm_auth_action.dart';
 import 'package:epictale_telegram/room/help_action.dart';
 import 'package:epictale_telegram/room/info_action.dart';
@@ -63,6 +65,18 @@ void main() {
     final action = router.route("/help");
 
     expect(action, const TypeMatcher<HelpAction>());
+  });
+
+  test("test new cards action", () {
+    final action = router.route("/cards");
+
+    expect(action, const TypeMatcher<CardsAction>());
+  });
+
+  test("test receive cards action", () {
+    final action = router.route("/cardsreceive");
+
+    expect(action, const TypeMatcher<ReceiveCardsAction>());
   });
 
   test("test wrong action", () {

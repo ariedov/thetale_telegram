@@ -4,11 +4,16 @@ services:
   mongo:
     image: mongo
     ports:
-      - 27017:27017
+      - ${MONGO_PORT}:27017
   telegram:
     build: .
     command: dart bin/server.dart
+    container_name: ${CONTAINER_NAME}
     ports:
-      - "7070:8080"
+      - "${TARGET_PORT}:8080"
+    environment:
+      - MONGO=${MONGO}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - WEBHOOK=${WEBHOOK}
     depends_on:
       - mongo
