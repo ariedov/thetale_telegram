@@ -1,6 +1,7 @@
 # epictale_telegram
 
 [![Build Status](https://travis-ci.org/ariedov/thetale_telegram.svg?branch=master)](https://travis-ci.org/ariedov/thetale_telegram)
+[![codecov](https://codecov.io/gh/ariedov/thetale_telegram/branch/master/graph/badge.svg)](https://codecov.io/gh/ariedov/thetale_telegram)
 
 You can reach the bot here: [@EpicTaleBot](https://t.me/EpicTaleBot)
 

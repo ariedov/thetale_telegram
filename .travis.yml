@@ -1,5 +1,8 @@
 language: dart
-script: pub run test -r expanded
-branches:
-  only:
-    - master
+dart:
+  - stable
+script:
+  - pub get --packages-dir
+  - pub run test
+  - pub run test_coverage
+  - bash <(curl -s https://codecov.io/bash)
