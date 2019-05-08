@@ -68,9 +68,9 @@ void main() {
   });
 
   test("test new cards action", () {
-    final action = router.route("/cardscount");
+    final action = router.route("/cards");
 
-    expect(action, const TypeMatcher<NewCardsAction>());
+    expect(action, const TypeMatcher<CardsAction>());
   });
 
   test("test receive cards action", () {

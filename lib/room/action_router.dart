@@ -35,8 +35,8 @@ class ActionRouter {
         return AddAccountAction(_taleApi, _telegramApi);
       case RemoveAccountAction.name:
         return RemoveAccountAction(_userManager, _taleApi, _telegramApi);
-      case NewCardsAction.name:
-        return NewCardsAction(_taleApi, _telegramApi);
+      case CardsAction.name:
+        return CardsAction(_taleApi, _telegramApi);
       case ReceiveCardsAction.name:
         return ReceiveCardsAction(_taleApi, _telegramApi);
       default:

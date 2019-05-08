@@ -5,10 +5,10 @@ import 'package:epictale_telegram/telegram_api/models.dart';
 import 'package:epictale_telegram/telegram_api/telegram_api.dart';
 import 'package:thetale_api/thetale_api.dart';
 
-class NewCardsAction extends MultiUserAction {
-  NewCardsAction(TaleApiWrapper taleApi, TelegramApi telegramApi) : super(taleApi, telegramApi);
+class CardsAction extends MultiUserAction {
+  CardsAction(TaleApiWrapper taleApi, TelegramApi telegramApi) : super(taleApi, telegramApi);
 
-  static const String name = "/cardscount";
+  static const String name = "/cards";
 
   @override
   Future<void> performAction({String account}) async {

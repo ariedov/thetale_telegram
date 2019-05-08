@@ -10,13 +10,13 @@ void main() {
   TaleApiMock taleApi;
   TelegramApiMock telegramApi;
 
-  NewCardsAction action;
+  CardsAction action;
 
   setUp(() {
     taleApi = TaleApiMock();
     telegramApi = TelegramApiMock();
 
-    action = NewCardsAction(taleApi, telegramApi);
+    action = CardsAction(taleApi, telegramApi);
   });
 
   test("test no new cards", () async {
