@@ -43,10 +43,12 @@ class ReceiveCardsAction extends MultiUserAction {
   }
 
   String buildCardList(List<Card> cards) {
-    return cards.fold(StringBuffer(), (buffer, card) { 
-      buffer.write("🃏 ${card.name}");
+    final buffer = StringBuffer();
+    buffer.write("Получено новых карт ${cards.length}:");
+    return cards.fold(buffer, (buffer, card) { 
       buffer.writeln();
+      buffer.write("🃏 ${card.name}");
       return buffer;
-    }).toString().trim();
+    }).toString();
   }
 }

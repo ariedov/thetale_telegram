@@ -29,7 +29,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage("🃏 first\n🃏 second\n🃏 third"));
+    verify(telegramApi.sendMessage("Получено новых карт 3:\n🃏 first\n🃏 second\n🃏 third"));
   });
 
   test("test build no cards", () async {
