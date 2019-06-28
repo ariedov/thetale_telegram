@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class HelpAction extends MultiUserAction {
-  HelpAction(TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  HelpAction(
+      ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(chatInfo, taleApi, telegram);
 
   static const String name = "/help";
 
@@ -32,8 +33,8 @@ class HelpAction extends MultiUserAction {
   Future<void> performChooserAction(Map<String, String> sessionNameMap) async {
     if (sessionNameMap.isNotEmpty) {
       await trySendMessage("Выбери кому ты хочешь помочь.",
-          inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(sessionNameMap, name)));
+          replyMarkup: InlineKeyboardMarkup(
+              inline_keyboard: buildAccountListAction(sessionNameMap, name)));
     } else {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");

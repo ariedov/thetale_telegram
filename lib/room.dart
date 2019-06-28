@@ -4,8 +4,8 @@ import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/persistence/user_manager_provider.dart';
 import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/action_router.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 const String apiUrl = "https://the-tale.org";
@@ -20,8 +20,7 @@ class RoomFactory {
   Room createRoom(int chatId) {
     final userManager = _userProvider.getUserManager(chatId);
     final taleApi = WrapperBuilder().build(apiUrl, applicationId, appVersion);
-    final telegramApi = TelegramApi(chatId);
-    final actionRouter = ActionRouter(userManager, taleApi, telegramApi);
+    final actionRouter = ActionRouter(userManager, taleApi);
 
     return Room(userManager, taleApi, actionRouter);
   }
@@ -31,6 +30,7 @@ class RoomManager {
   RoomManager(this._roomFactory);
 
   final Map<int, Room> _rooms = {};
+
   final RoomFactory _roomFactory;
 
   Room getRoom(int chatId) {
@@ -48,25 +48,26 @@ class Room {
   final TaleApiWrapper _taleApi;
   final ActionRouter _actionRouter;
 
-  /// This method will call both telegram and tale api
-  Future processUpdate(Update update) async {
+  Future processMessage(ChatInfo chatInfo, TelegramWrapper telegram, Message message) async {
     try {
-      String message;
-      if (update.callbackQuery != null) {
-        message = update.callbackQuery.data;
-      } else {
-        message = update.message.text;
-      }
-      await _processMessage(message);
+      await _processText(chatInfo, telegram, message.text);
     } catch (e) {
       print(e);
     }
   }
 
-  Future<void> _processMessage(String message) async {
-    final actionAccount = processMessage(message.trim());
+  Future processCallbackQuery(ChatInfo chatInfo, TelegramWrapper telegram, CallbackQuery callbackQuery) async {
+    try {
+      await _processText(chatInfo, telegram, callbackQuery.data);
+    } catch (e) {
+      print(e);
+    }
+  }
 
-    final action = _actionRouter.route(actionAccount.action);
+  Future<void> _processText(ChatInfo chatInfo, TelegramWrapper telegram, String message) async {
+    final actionAccount = getActionAccountFromMessage(message.trim());
+
+    final action = _actionRouter.route(chatInfo, telegram, actionAccount.action);
     final sessions = await _userManager.readUserSession() ?? [];
 
     final accountSession = sessions.firstWhere(
@@ -116,7 +117,7 @@ class Room {
   }
 }
 
-ActionAccount processMessage(String message) {
+ActionAccount getActionAccountFromMessage(String message) {
   final exp = RegExp(r"(\/\w+)\s*(\w+)*");
   final groups = exp.firstMatch(message);
 

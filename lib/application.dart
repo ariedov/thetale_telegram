@@ -1,47 +1,39 @@
 import 'dart:async';
-import 'dart:convert';
+
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/teledart.dart';
+import 'package:teledart/telegram.dart';
 
 import 'package:epictale_telegram/constants.dart';
 import 'package:epictale_telegram/persistence/user_manager_provider.dart';
 import 'package:epictale_telegram/room.dart';
-import 'package:epictale_telegram/telegram_api/converters.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
-import 'package:epictale_telegram/server.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
 class Application {
   Future init() async {
-    final server = Server();
-
-    print("port $port"); 
-    await server.startServer(port: port);
-
-    await setupWebHook(telegramWebhook);
+    print("port $port");
 
     final db = Db(mongodbUri);
     await db.open();
 
-    try {
-      final userProvider = UserManagerProvider(db);
-      final roomFactory = RoomFactory(userProvider);
-      final roomManager = RoomManager(roomFactory);
+    final userProvider = UserManagerProvider(db);
+    final roomFactory = RoomFactory(userProvider);
+    final roomManager = RoomManager(roomFactory);
 
-      await for (var data in server.listen()) {
-        print(data);
-        final update = convertUpdate(json.decode(data as String));
-        final room = roomManager.getRoom(update.chatId);
+    final teledart = TeleDart(Telegram(token), Event());
+    final wrapper = TelegramWrapper(teledart);
 
-        processRoom(room, update);
-      }
-    } catch (e) {
-      print(e);
-    } finally {
-      await db.close();
-    }
-  }
+    teledart.onMessage().listen((message) {
+      final room = roomManager.getRoom(message.chat.id);
+      final info = ChatInfo(message.chat.id);
+      room.processMessage(info, wrapper, message);
+      
+    });
 
-  void processRoom(Room room, Update update) async {
-    await room.processUpdate(update);
+    teledart.onCallbackQuery().listen((query) {
+      final room = roomManager.getRoom(query.message.chat.id);
+      final info = ChatInfo(query.message.chat.id);
+      room.processCallbackQuery(info, wrapper, query);
+    });
   }
 }

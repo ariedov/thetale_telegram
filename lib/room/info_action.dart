@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class InfoAction extends MultiUserAction {
-  InfoAction(TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  InfoAction(
+      ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(chatInfo, taleApi, telegram);
 
   static const String name = "/info";
 
@@ -22,8 +23,8 @@ class InfoAction extends MultiUserAction {
   Future<void> performChooserAction(Map<String, String> sessionNameMap) async {
     if (sessionNameMap.isNotEmpty) {
       await trySendMessage("Выбери о ком ты хочешь узнать.",
-          inlineKeyboard:
-              InlineKeyboard(buildAccountListAction(sessionNameMap, name)));
+          replyMarkup: InlineKeyboardMarkup(
+              inline_keyboard: buildAccountListAction(sessionNameMap, name)));
     } else {
       await trySendMessage(
           "Видимо данные об аккаунтах устарели. Попробуй перезайти через /auth");
@@ -33,6 +34,6 @@ class InfoAction extends MultiUserAction {
   @override
   Future<void> performEmptyAction() async {
     await trySendMessage(
-          "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
+        "Чтобы получить информацию нужно войти в аккаунт. Попробуй /auth или /start.");
   }
 }

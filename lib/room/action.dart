@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 const String apiUrl = "https://the-tale.org";
@@ -11,10 +11,11 @@ const String applicationInfo = "Телеграм бот для игры в ск�
 const String applicationDescription = "Телеграм бот для игры в сказку";
 
 abstract class TelegramAction {
-  TelegramAction(this._taleApi, this._telegramApi);
+  TelegramAction(this._chatInfo, this._taleApi, this._telegram);
 
+  final ChatInfo _chatInfo;
   final TaleApiWrapper _taleApi;
-  final TelegramApi _telegramApi;
+  final TelegramWrapper _telegram;
 
   Future<void> apply({String account}) async {
     try {
@@ -32,13 +33,12 @@ abstract class TelegramAction {
   Future<void> performAction({String account});
 
   TaleApiWrapper get taleApi => _taleApi;
-  TelegramApi get telegramApi => _telegramApi;
+  TelegramWrapper get telegram => _telegram;
 
   Future<Message> trySendMessage(String message,
-      {ReplyKeyboard keyboard, InlineKeyboard inlineKeyboard}) async {
+      {ReplyMarkup replyMarkup}) async {
     try {
-      return await telegramApi.sendMessage(message,
-          keyboard: keyboard, inlineKeyboard: inlineKeyboard);
+      return await telegram.sendMessage(_chatInfo, message, replyMarkup: replyMarkup);
     } catch (e) {
       print("Failed to send message");
     }
@@ -47,8 +47,8 @@ abstract class TelegramAction {
 }
 
 abstract class MultiUserAction extends TelegramAction {
-  MultiUserAction(TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  MultiUserAction(ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(chatInfo, taleApi, telegram);
 
   Future<void> performChooserAction(Map<String, String> sessionNameMap);
 
@@ -60,7 +60,7 @@ abstract class MultiUserAction extends TelegramAction {
 
     for (final entry in sessionNameMap.entries) {
       buttons
-          .add([InlineKeyboardButton(entry.value, "$action ${entry.key}")]);
+          .add([InlineKeyboardButton(text: entry.value, callback_data: "$action ${entry.key}")]);
     }
     return buttons;
   }

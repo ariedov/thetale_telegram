@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class RemoveAccountAction extends MultiUserAction {
-  RemoveAccountAction(
-      this._userManager, TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  RemoveAccountAction(this._userManager, ChatInfo info, TaleApiWrapper taleApi,
+      TelegramWrapper telegram)
+      : super(info, taleApi, telegram);
 
   static const String name = "/remove";
 
@@ -33,8 +33,8 @@ class RemoveAccountAction extends MultiUserAction {
     if (sessionNameMap.isNotEmpty) {
       await trySendMessage(
         "Выбери героя чтобы удалить.",
-        inlineKeyboard:
-            InlineKeyboard(buildAccountListAction(sessionNameMap, "/remove")),
+        replyMarkup: InlineKeyboardMarkup(
+            inline_keyboard: buildAccountListAction(sessionNameMap, "/remove")),
       );
     } else {
       await trySendMessage(

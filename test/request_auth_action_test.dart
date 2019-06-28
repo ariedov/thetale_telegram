@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/request_auth_action.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 void main() {
+  ChatInfo chatInfo;
   UserManagerMock userManager;
   TelegramApiMock telegramApi;
   TaleApiMock taleApi;
@@ -18,13 +19,14 @@ void main() {
   RequestAuthAction action;
 
   setUp(() {
+    chatInfo = ChatInfo(0);
     userManager = UserManagerMock();
     taleApi = TaleApiMock();
 
     taleApiWrapper = TaleApiWrapper(taleApi, "");
     telegramApi = TelegramApiMock();
 
-    action = RequestAuthAction(userManager, taleApiWrapper, telegramApi);
+    action = RequestAuthAction(userManager, chatInfo, taleApiWrapper, telegramApi);
   });
 
   test("perform action test", () async {
@@ -59,7 +61,7 @@ class UserManagerMock extends Mock implements UserManager {}
 
 class TaleApiMock extends Mock implements TaleApi {}
 
-class TelegramApiMock extends Mock implements TelegramApi {}
+class TelegramApiMock extends Mock implements TelegramWrapper {}
 
 class SessionStorageMock implements SessionStorage {
   SessionInfo _sessionInfo;

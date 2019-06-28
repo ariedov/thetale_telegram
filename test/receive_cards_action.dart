@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/room/cards/receive_cards_action.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
@@ -9,16 +9,18 @@ import 'package:thetale_api/thetale_api.dart';
 import 'utils.dart';
 
 void main() {
+  ChatInfo chatInfo;
   TaleApiMock taleApi;
   TelegramApiMock telegramApi;
 
   ReceiveCardsAction action;
 
   setUp(() {
+    chatInfo = ChatInfo(0);
     taleApi = TaleApiMock();
     telegramApi = TelegramApiMock();
 
-    action = ReceiveCardsAction(taleApi, telegramApi);
+    action = ReceiveCardsAction(chatInfo, taleApi, telegramApi);
   });
 
   test("test build card list", () async {
@@ -29,7 +31,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage("Получено новых карт 3:\n🃏 first\n🃏 second\n🃏 third"));
+    verify(telegramApi.sendMessage(chatInfo, "Получено новых карт 3:\n🃏 first\n🃏 second\n🃏 third"));
   });
 
   test("test build no cards", () async {
@@ -38,7 +40,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage("Не получилось взять новые карты."));
+    verify(telegramApi.sendMessage(chatInfo, "Не получилось взять новые карты."));
   });
 
   test("test build null cards", () async {
@@ -47,11 +49,11 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage("Не получилось взять новые карты."));
+    verify(telegramApi.sendMessage(chatInfo, "Не получилось взять новые карты."));
 
   });
 }
 
 class TaleApiMock extends Mock implements TaleApiWrapper {}
 
-class TelegramApiMock extends Mock implements TelegramApi {}
+class TelegramApiMock extends Mock implements TelegramWrapper {}

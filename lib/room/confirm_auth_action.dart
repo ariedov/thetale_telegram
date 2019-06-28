@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class ConfirmAuthAction extends TelegramAction {
   ConfirmAuthAction(
-      TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+      ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(chatInfo, taleApi, telegram);
 
   static const String name = "/confirm";
 
@@ -18,9 +18,9 @@ class ConfirmAuthAction extends TelegramAction {
 
     if (status.data.isAccepted) {
       await trySendMessage("Ну привет, ${status.data.accountName}.",
-          keyboard: ReplyKeyboard([
-            ["/help"],
-            ["/info"],
+          replyMarkup: ReplyKeyboardMarkup(keyboard: [
+            [KeyboardButton(text: "/help")],
+            [KeyboardButton(text: "/info")],
           ]));
 
       // TODO: remove "/confirm" button from previous message

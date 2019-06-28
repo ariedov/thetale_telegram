@@ -9,36 +9,35 @@ import 'package:epictale_telegram/room/info_action.dart';
 import 'package:epictale_telegram/room/remove_account_action.dart';
 import 'package:epictale_telegram/room/request_auth_action.dart';
 import 'package:epictale_telegram/room/start_action.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class ActionRouter {
-  ActionRouter(this._userManager, this._taleApi, this._telegramApi);
+  ActionRouter(this._userManager, this._taleApi);
 
   final UserManager _userManager;
   final TaleApiWrapper _taleApi;
-  final TelegramApi _telegramApi;
 
-  TelegramAction route(String action) {
+  TelegramAction route(ChatInfo chatInfo, TelegramWrapper telegram, String action) {
     switch (action) {
       case StartAction.name:
-        return StartAction(_userManager, _taleApi, _telegramApi);
+        return StartAction(_userManager, chatInfo, _taleApi, telegram);
       case RequestAuthAction.name:
-        return RequestAuthAction(_userManager, _taleApi, _telegramApi);
+        return RequestAuthAction(_userManager, chatInfo, _taleApi, telegram);
       case ConfirmAuthAction.name:
-        return ConfirmAuthAction(_taleApi, _telegramApi);
+        return ConfirmAuthAction(chatInfo, _taleApi, telegram);
       case InfoAction.name:
-        return InfoAction(_taleApi, _telegramApi);
+        return InfoAction(chatInfo, _taleApi, telegram);
       case HelpAction.name:
-        return HelpAction(_taleApi, _telegramApi);
+        return HelpAction(chatInfo, _taleApi, telegram);
       case AddAccountAction.name:
-        return AddAccountAction(_taleApi, _telegramApi);
+        return AddAccountAction(chatInfo, _taleApi, telegram);
       case RemoveAccountAction.name:
-        return RemoveAccountAction(_userManager, _taleApi, _telegramApi);
+        return RemoveAccountAction(_userManager, chatInfo, _taleApi, telegram);
       case CardsAction.name:
-        return CardsAction(_taleApi, _telegramApi);
+        return CardsAction(chatInfo, _taleApi, telegram);
       case ReceiveCardsAction.name:
-        return ReceiveCardsAction(_taleApi, _telegramApi);
+        return ReceiveCardsAction(chatInfo, _taleApi, telegram);
       default:
         throw Exception("Action $action not supported");
     }
