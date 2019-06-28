@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class AddAccountAction extends TelegramAction {
   AddAccountAction(
-      TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+      ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(chatInfo, taleApi, telegram);
 
   static const String name = "/add";
 
@@ -17,13 +17,14 @@ class AddAccountAction extends TelegramAction {
     final info = await taleApi.apiInfo();
 
     final link = await taleApi.auth(
-      applicationName, applicationInfo, applicationDescription);
+        applicationName, applicationInfo, applicationDescription);
     await trySendMessage(
       "Чтобы добавить аккаунт - перейди по ссылке ${apiUrl}${link.authorizationPage}",
-      inlineKeyboard: InlineKeyboard([
+      replyMarkup: InlineKeyboardMarkup(inline_keyboard: [
         [
           InlineKeyboardButton(
-              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
+              text: "/confirm",
+              callback_data: "/confirm ${info.sessionInfo.sessionId}")
         ]
       ]),
     );

@@ -2,15 +2,16 @@ import 'dart:async';
 
 import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/add_account_action.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 void main() {
-  TelegramApiMock telegramApi;
+  TelegramApiMock telegram;
   TaleApiMock taleApi;
 
+  ChatInfo chatInfo;
   TaleApiWrapper taleApiWrapper;
 
   AddAccountAction action;
@@ -18,10 +19,11 @@ void main() {
   setUp(() {
     taleApi = TaleApiMock();
 
+    chatInfo = ChatInfo(0);
     taleApiWrapper = TaleApiWrapper(taleApi, "");
-    telegramApi = TelegramApiMock();
+    telegram = TelegramApiMock();
 
-    action = AddAccountAction(taleApiWrapper, telegramApi);
+    action = AddAccountAction(chatInfo, taleApiWrapper, telegram);
   });
 
   test("test add account", () async {
@@ -54,7 +56,7 @@ void main() {
 
 class TaleApiMock extends Mock implements TaleApi {}
 
-class TelegramApiMock extends Mock implements TelegramApi {}
+class TelegramApiMock extends Mock implements TelegramWrapper {}
 
 class SessionStorageMock implements SessionStorage {
   SessionInfo _sessionInfo;

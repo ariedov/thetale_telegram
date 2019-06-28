@@ -4,38 +4,43 @@ import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room.dart';
 import 'package:epictale_telegram/room/action.dart';
 import 'package:epictale_telegram/room/action_router.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 void main() {
   UserManagerMock userManager;
+  ChatInfo chatInfo;
   TaleApiMock taleMock;
   ActionRouterMock routerMock;
+  TelegramWrapper telegram;
   Room room;
 
   setUp(() {
+    chatInfo = ChatInfo(0);
     userManager = UserManagerMock();
     taleMock = TaleApiMock();
     routerMock = ActionRouterMock();
+    telegram = TelegramMock();
 
     room = Room(userManager, taleMock, routerMock);
   });
 
   test("test single user action", () async {
-    final update = createUpdateWithAction("/start");
+    final update = createMessageWithAction("/start");
     final action = SingleUserTelegramAction();
-    when(routerMock.route("/start")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/start")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.apply(account: null));
   });
 
   test('test message processing', () {
     const message = "/help 123";
-    final actionAccount = processMessage(message);
+    final actionAccount = getActionAccountFromMessage(message);
 
     expect(actionAccount.action, "/help");
     expect(actionAccount.account, "123");
@@ -43,19 +48,19 @@ void main() {
 
   test('test message without account', () {
     const message = "/help";
-    final actionAccount = processMessage(message);
+    final actionAccount = getActionAccountFromMessage(message);
 
     expect(actionAccount.action, "/help");
     expect(actionAccount.account, null);
   });
 
   test('test process multi user action without accounts at all', () async {
-    final update = createUpdateWithAction("/help");
+    final update = createMessageWithAction("/help");
     final action = MultiUserTelegramAction();
 
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.performEmptyAction());
   });
@@ -63,29 +68,29 @@ void main() {
   test('test process multi user action without account with single available',
       () async {
     final action = MultiUserTelegramAction();
-    final update = createUpdateWithAction("/help");
+    final update = createMessageWithAction("/help");
 
     when(userManager.readUserSession())
         .thenAnswer((_) => Future(() => [SessionInfo("session", "info")]));
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.apply(account: "session"));
   });
 
   test('test process multi user action without account with multiple available',
       () async {
-    final update = createUpdateWithAction("/help");
+    final update = createMessageWithAction("/help");
     final action = MultiUserTelegramAction();
 
     when(userManager.readUserSession()).thenAnswer((_) => Future(
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.performChooserAction(any));
     verify(taleMock.setStorage(any));
@@ -94,16 +99,16 @@ void main() {
   test(
       'test process multi user action with first account with multiple available',
       () async {
-    final update = createUpdateWithAction("/help session");
+    final update = createMessageWithAction("/help session");
     final action = MultiUserTelegramAction();
 
     when(userManager.readUserSession()).thenAnswer((_) => Future(
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.apply(account: "session"));
   });
@@ -111,96 +116,91 @@ void main() {
   test(
       'test process multi user action with second account with multiple available',
       () async {
-    final update = createUpdateWithAction("/help second");
+    final update = createMessageWithAction("/help second");
     final action = MultiUserTelegramAction();
 
     when(userManager.readUserSession()).thenAnswer((_) => Future(
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.apply(account: "second"));
   });
 
   test('test process multi user action with account', () async {
-    final update = createUpdateWithAction("/help session");
+    final message = createMessageWithAction("/help session");
     final action = MultiUserTelegramAction();
 
     when(userManager.readUserSession())
         .thenAnswer((_) => Future(() => [SessionInfo("session", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, message);
 
     verify(action.apply(account: "session"));
   });
 
   test('test process multi user action with empty session', () async {
-    final update = createUpdateWithAction("/help session");
+    final message = createMessageWithAction("/help session");
     final action = MultiUserTelegramAction();
 
-    when(routerMock.route("/help")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, message);
 
     verify(action.performEmptyAction());
   });
 
   test('test process first user action with multiple sessions', () async {
-    final update = createUpdateWithAction("/confirm session");
+    final message = createMessageWithAction("/confirm session");
     final action = SingleUserTelegramAction();
 
-    when(userManager.readUserSession())
-        .thenAnswer((_) => Future(() => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
-    when(routerMock.route("/confirm")).thenReturn(action);
+    when(userManager.readUserSession()).thenAnswer((_) => Future(
+        () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
+    when(routerMock.route(chatInfo, telegram, "/confirm")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, message);
 
     verify(action.apply(account: "session"));
   });
 
   test('test process second user action with multiple sessions', () async {
-    final update = createUpdateWithAction("/confirm second");
+    final update = createMessageWithAction("/confirm second");
     final action = SingleUserTelegramAction();
 
-    when(userManager.readUserSession())
-        .thenAnswer((_) => Future(() => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
-    when(routerMock.route("/confirm")).thenReturn(action);
+    when(userManager.readUserSession()).thenAnswer((_) => Future(
+        () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
+    when(routerMock.route(chatInfo, telegram, "/confirm")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.apply(account: "second"));
   });
 
   test('test process second user action with multiple sessions', () async {
-    final update = createUpdateWithAction("/confirm session");
+    final update = createMessageWithAction("/confirm session");
     final action = SingleUserTelegramAction();
 
-    when(routerMock.route("/confirm")).thenReturn(action);
+    when(routerMock.route(chatInfo, telegram, "/confirm")).thenReturn(action);
 
-    await room.processUpdate(update);
+    await room.processMessage(chatInfo, telegram, update);
 
     verify(action.apply(account: null));
   });
 }
 
-Update createUpdateWithAction(String action) {
-  return Update(
-      0,
-      null,
-      Message(
-          0,
-          User(0, "firstName", "lastName", "username", "languageCode",
-              isBot: false),
-          Chat(0, "firstName", "lastName", "userName", ChatType.private),
-          0,
-          action,
-          []));
+Message createMessageWithAction(String action) {
+  return Message(
+      message_id: 0,
+      from: User(id: 0, first_name: "firstName", last_name: "lastName", username: "username", language_code: "languageCode",
+          is_bot: false),
+      chat: Chat(id: 0, first_name: "firstName", last_name: "lastName", username: "userName", type: "private"),
+      text: action);
 }
 
 GameInfo createGameInfoWithCharacterName(String character) {
@@ -239,3 +239,5 @@ class UserManagerMock extends Mock implements UserManager {}
 class TaleApiMock extends Mock implements TaleApiWrapper {}
 
 class ActionRouterMock extends Mock implements ActionRouter {}
+
+class TelegramMock extends Mock implements TelegramWrapper {}

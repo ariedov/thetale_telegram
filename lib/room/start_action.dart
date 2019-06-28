@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:epictale_telegram/persistence/user_manager.dart';
 import 'package:epictale_telegram/room/action.dart';
-import 'package:epictale_telegram/telegram_api/models.dart';
-import 'package:epictale_telegram/telegram_api/telegram_api.dart';
+import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
+import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class StartAction extends TelegramAction {
-  StartAction(
-      this._userManager, TaleApiWrapper taleApi, TelegramApi telegramApi)
-      : super(taleApi, telegramApi);
+  StartAction(this._userManager, ChatInfo chatInfo, TaleApiWrapper taleApi,
+      TelegramWrapper telegramApi)
+      : super(chatInfo, taleApi, telegramApi);
 
   static const String name = "/start";
 
@@ -41,10 +41,11 @@ class StartAction extends TelegramAction {
         applicationName, applicationInfo, applicationDescription);
     await trySendMessage(
       "Чтобы авторизоваться - перейди по ссылке ${apiUrl}${link.authorizationPage}",
-      inlineKeyboard: InlineKeyboard([
+      replyMarkup: InlineKeyboardMarkup(inline_keyboard: [
         [
           InlineKeyboardButton(
-              "/confirm", "/confirm ${info.sessionInfo.sessionId}")
+              text: "/confirm",
+              callback_data: "/confirm ${info.sessionInfo.sessionId}")
         ]
       ]),
     );
