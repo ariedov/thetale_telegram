@@ -21,7 +21,9 @@ class Application {
     final teledart = TeleDart(Telegram(token), Event());
     final wrapper = TelegramWrapper(teledart);
 
-    teledart.onMessage().listen((message) {
+    await teledart.start();
+
+    teledart.onCommand().listen((message) {
       final room = roomManager.getRoom(message.chat.id);
       final info = ChatInfo(message.chat.id);
       room.processMessage(info, wrapper, message);
