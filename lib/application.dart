@@ -11,8 +11,6 @@ import 'package:mongo_dart/mongo_dart.dart';
 
 class Application {
   Future init() async {
-    print("port $port");
-
     final db = Db(mongodbUri);
     await db.open();
 

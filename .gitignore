@@ -18,3 +18,4 @@ test/.test_coverage.dart
 coverage/
 coverage/lcov.info
 badge.svg
+.vscode
