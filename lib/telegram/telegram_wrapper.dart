@@ -9,7 +9,7 @@ class TelegramWrapper {
   final TeleDart teleDart;
 
   Future<Message> sendMessage(ChatInfo chatInfo, String text, {ReplyMarkup replyMarkup}) {
-    return teleDart.telegram.sendMessage(chatInfo.chatId, text, reply_markup: replyMarkup);
+    return teleDart.telegram.sendMessage(chatInfo.chatId, text, reply_markup: replyMarkup, parse_mode: "Markup");
   }
 }
 
