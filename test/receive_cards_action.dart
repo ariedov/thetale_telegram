@@ -9,18 +9,18 @@ import 'package:thetale_api/thetale_api.dart';
 import 'utils.dart';
 
 void main() {
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   TaleApiMock taleApi;
   TelegramApiMock telegramApi;
 
   ReceiveCardsAction action;
 
   setUp(() {
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 0);
     taleApi = TaleApiMock();
     telegramApi = TelegramApiMock();
 
-    action = ReceiveCardsAction(chatInfo, taleApi, telegramApi);
+    action = ReceiveCardsAction(messageInfo, taleApi, telegramApi);
   });
 
   test("test build card list", () async {
@@ -31,7 +31,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(chatInfo, "Получено новых карт 3:\n🃏 first\n🃏 second\n🃏 third"));
+    verify(telegramApi.sendMessage(0, "Получено новых карт 3:\n🃏 first\n🃏 second\n🃏 third"));
   });
 
   test("test build no cards", () async {
@@ -40,7 +40,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(chatInfo, "Не получилось взять новые карты."));
+    verify(telegramApi.sendMessage(0, "Не получилось взять новые карты."));
   });
 
   test("test build null cards", () async {
@@ -49,7 +49,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(chatInfo, "Не получилось взять новые карты."));
+    verify(telegramApi.sendMessage(0, "Не получилось взять новые карты."));
 
   });
 }

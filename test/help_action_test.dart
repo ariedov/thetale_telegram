@@ -8,20 +8,20 @@ void main() {
 
   TaleApiMock taleApi;
   TelegramApiMock telegramApi;
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   HelpAction action;
 
   setUp(() {
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 1);
     taleApi = TaleApiMock();
     telegramApi = TelegramApiMock();
-    action = HelpAction(chatInfo, taleApi, telegramApi);
+    action = HelpAction(messageInfo, taleApi, telegramApi);
   });
 
   test('test empty action', () async {
     await action.performEmptyAction();
 
-    verify(telegramApi.sendMessage(chatInfo, "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start."));
+    verify(telegramApi.sendMessage(0, "Чтобы помочь нужно войти в аккаунт. Попробуй /auth или /start."));
   });
 }
 

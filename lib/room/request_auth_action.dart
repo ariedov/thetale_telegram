@@ -7,7 +7,7 @@ import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class RequestAuthAction extends TelegramAction {
-  RequestAuthAction(this._userManager, ChatInfo info, TaleApiWrapper taleApi,
+  RequestAuthAction(this._userManager, MessageInfo info, TaleApiWrapper taleApi,
       TelegramWrapper telegramWrapper)
       : super(info, taleApi, telegramWrapper);
 

@@ -18,26 +18,26 @@ class ActionRouter {
   final UserManager _userManager;
   final TaleApiWrapper _taleApi;
 
-  TelegramAction route(ChatInfo chatInfo, TelegramWrapper telegram, String action) {
+  TelegramAction route(MessageInfo messageInfo, TelegramWrapper telegram, String action) {
     switch (action) {
       case StartAction.name:
-        return StartAction(_userManager, chatInfo, _taleApi, telegram);
+        return StartAction(_userManager, messageInfo, _taleApi, telegram);
       case RequestAuthAction.name:
-        return RequestAuthAction(_userManager, chatInfo, _taleApi, telegram);
+        return RequestAuthAction(_userManager, messageInfo, _taleApi, telegram);
       case ConfirmAuthAction.name:
-        return ConfirmAuthAction(chatInfo, _taleApi, telegram);
+        return ConfirmAuthAction(messageInfo, _taleApi, telegram);
       case InfoAction.name:
-        return InfoAction(chatInfo, _taleApi, telegram);
+        return InfoAction(messageInfo, _taleApi, telegram);
       case HelpAction.name:
-        return HelpAction(chatInfo, _taleApi, telegram);
+        return HelpAction(messageInfo, _taleApi, telegram);
       case AddAccountAction.name:
-        return AddAccountAction(chatInfo, _taleApi, telegram);
+        return AddAccountAction(messageInfo, _taleApi, telegram);
       case RemoveAccountAction.name:
-        return RemoveAccountAction(_userManager, chatInfo, _taleApi, telegram);
+        return RemoveAccountAction(_userManager, messageInfo, _taleApi, telegram);
       case CardsAction.name:
-        return CardsAction(chatInfo, _taleApi, telegram);
+        return CardsAction(messageInfo, _taleApi, telegram);
       case ReceiveCardsAction.name:
-        return ReceiveCardsAction(chatInfo, _taleApi, telegram);
+        return ReceiveCardsAction(messageInfo, _taleApi, telegram);
       default:
         throw Exception("Action $action not supported");
     }

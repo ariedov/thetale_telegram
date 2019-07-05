@@ -8,8 +8,8 @@ import 'package:thetale_api/thetale_api.dart';
 
 class CardsAction extends MultiUserAction {
   CardsAction(
-      ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
-      : super(chatInfo, taleApi, telegram);
+      MessageInfo messageInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(messageInfo, taleApi, telegram);
 
   static const String name = "/cards";
 

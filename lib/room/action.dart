@@ -11,9 +11,9 @@ const String applicationInfo = "Телеграм бот для игры в ск�
 const String applicationDescription = "Телеграм бот для игры в сказку";
 
 abstract class TelegramAction {
-  TelegramAction(this._chatInfo, this._taleApi, this._telegram);
+  TelegramAction(this._messageInfo, this._taleApi, this._telegram);
 
-  final ChatInfo _chatInfo;
+  final MessageInfo _messageInfo;
   final TaleApiWrapper _taleApi;
   final TelegramWrapper _telegram;
 
@@ -38,7 +38,7 @@ abstract class TelegramAction {
   Future<Message> trySendMessage(String message,
       {ReplyMarkup replyMarkup}) async {
     try {
-      return await telegram.sendMessage(_chatInfo, message, replyMarkup: replyMarkup);
+      return await telegram.sendMessage(_messageInfo.chatId, message, replyMarkup: replyMarkup);
     } catch (e) {
       print("Failed to send message");
     }
@@ -47,8 +47,8 @@ abstract class TelegramAction {
 }
 
 abstract class MultiUserAction extends TelegramAction {
-  MultiUserAction(ChatInfo chatInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
-      : super(chatInfo, taleApi, telegram);
+  MultiUserAction(MessageInfo messageInfo, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      : super(messageInfo, taleApi, telegram);
 
   Future<void> performChooserAction(Map<String, String> sessionNameMap);
 

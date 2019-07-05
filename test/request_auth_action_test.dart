@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 void main() {
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   UserManagerMock userManager;
   TelegramApiMock telegramApi;
   TaleApiMock taleApi;
@@ -19,14 +19,14 @@ void main() {
   RequestAuthAction action;
 
   setUp(() {
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 0);
     userManager = UserManagerMock();
     taleApi = TaleApiMock();
 
     taleApiWrapper = TaleApiWrapper(taleApi, "");
     telegramApi = TelegramApiMock();
 
-    action = RequestAuthAction(userManager, chatInfo, taleApiWrapper, telegramApi);
+    action = RequestAuthAction(userManager, messageInfo, taleApiWrapper, telegramApi);
   });
 
   test("perform action test", () async {

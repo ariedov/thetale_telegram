@@ -7,7 +7,7 @@ import 'package:thetale_api/thetale_api.dart';
 
 class ReceiveCardsAction extends MultiUserAction {
   ReceiveCardsAction(
-      ChatInfo info, TaleApiWrapper taleApi, TelegramWrapper telegram)
+      MessageInfo info, TaleApiWrapper taleApi, TelegramWrapper telegram)
       : super(info, taleApi, telegram);
 
   static const String name = "/cardsreceive";

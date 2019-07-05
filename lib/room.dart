@@ -48,26 +48,26 @@ class Room {
   final TaleApiWrapper _taleApi;
   final ActionRouter _actionRouter;
 
-  Future processMessage(ChatInfo chatInfo, TelegramWrapper telegram, Message message) async {
+  Future processMessage(MessageInfo messageInfo, TelegramWrapper telegram, Message message) async {
     try {
-      await _processText(chatInfo, telegram, message.text);
+      await _processText(messageInfo, telegram, message.text);
     } catch (e) {
       print(e);
     }
   }
 
-  Future processCallbackQuery(ChatInfo chatInfo, TelegramWrapper telegram, CallbackQuery callbackQuery) async {
+  Future processCallbackQuery(MessageInfo messageInfo, TelegramWrapper telegram, CallbackQuery callbackQuery) async {
     try {
-      await _processText(chatInfo, telegram, callbackQuery.data);
+      await _processText(messageInfo, telegram, callbackQuery.data);
     } catch (e) {
       print(e);
     }
   }
 
-  Future<void> _processText(ChatInfo chatInfo, TelegramWrapper telegram, String message) async {
+  Future<void> _processText(MessageInfo messageInfo, TelegramWrapper telegram, String message) async {
     final actionAccount = getActionAccountFromMessage(message.trim());
 
-    final action = _actionRouter.route(chatInfo, telegram, actionAccount.action);
+    final action = _actionRouter.route(messageInfo, telegram, actionAccount.action);
     final sessions = await _userManager.readUserSession() ?? [];
 
     final accountSession = sessions.firstWhere(

@@ -7,18 +7,18 @@ import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 void main() {
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   TaleApiMock taleApi;
   TelegramApiMock telegramApi;
 
   CardsAction action;
 
   setUp(() {
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 1);
     taleApi = TaleApiMock();
     telegramApi = TelegramApiMock();
 
-    action = CardsAction(chatInfo, taleApi, telegramApi);
+    action = CardsAction(messageInfo, taleApi, telegramApi);
   });
 
   test("test no new cards", () async {
@@ -26,7 +26,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(chatInfo, any, replyMarkup: null));
+    verify(telegramApi.sendMessage(0, any, replyMarkup: null));
   });
 
   test("test available new cards", () async {
@@ -34,8 +34,8 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(chatInfo, any, replyMarkup: anyNamed("replyMarkup")));
-    verifyNever(telegramApi.sendMessage(chatInfo, any, replyMarkup: null));
+    verify(telegramApi.sendMessage(0, any, replyMarkup: anyNamed("replyMarkup")));
+    verifyNever(telegramApi.sendMessage(0, any, replyMarkup: null));
   });
 }
 

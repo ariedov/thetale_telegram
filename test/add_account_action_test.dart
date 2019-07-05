@@ -11,7 +11,7 @@ void main() {
   TelegramApiMock telegram;
   TaleApiMock taleApi;
 
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   TaleApiWrapper taleApiWrapper;
 
   AddAccountAction action;
@@ -19,11 +19,11 @@ void main() {
   setUp(() {
     taleApi = TaleApiMock();
 
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 0);
     taleApiWrapper = TaleApiWrapper(taleApi, "");
     telegram = TelegramApiMock();
 
-    action = AddAccountAction(chatInfo, taleApiWrapper, telegram);
+    action = AddAccountAction(messageInfo, taleApiWrapper, telegram);
   });
 
   test("test add account", () async {

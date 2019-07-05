@@ -7,7 +7,7 @@ import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class RemoveAccountAction extends MultiUserAction {
-  RemoveAccountAction(this._userManager, ChatInfo info, TaleApiWrapper taleApi,
+  RemoveAccountAction(this._userManager, MessageInfo info, TaleApiWrapper taleApi,
       TelegramWrapper telegram)
       : super(info, taleApi, telegram);
 

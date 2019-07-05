@@ -16,7 +16,7 @@ import 'package:thetale_api/thetale_api.dart';
 
 void main() {
   TelegramWrapper telegram;
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   ActionRouter router;
 
   setUp(() {
@@ -25,65 +25,65 @@ void main() {
 
     router = ActionRouter(userManager, taleApi);
     telegram = TelegramApiMock();
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 1);
   });
 
   test("test start action", () {
-    final action = router.route(chatInfo, telegram, "/start");
+    final action = router.route(messageInfo, telegram, "/start");
 
     expect(action, const TypeMatcher<StartAction>());
   });
 
   test("test confirm action", () {
-    final action = router.route(chatInfo, telegram, "/confirm");
+    final action = router.route(messageInfo, telegram, "/confirm");
 
     expect(action, const TypeMatcher<ConfirmAuthAction>());
   });
 
   test("test auth action", () {
-    final action = router.route(chatInfo, telegram, "/auth");
+    final action = router.route(messageInfo, telegram, "/auth");
 
     expect(action, const TypeMatcher<RequestAuthAction>());
   });
 
   test("test add action", () {
-    final action = router.route(chatInfo, telegram, "/add");
+    final action = router.route(messageInfo, telegram, "/add");
 
     expect(action, const TypeMatcher<AddAccountAction>());
   });
 
   test("test remove action", () {
-    final action = router.route(chatInfo, telegram, "/remove");
+    final action = router.route(messageInfo, telegram, "/remove");
 
     expect(action, const TypeMatcher<RemoveAccountAction>());
   });
 
   test("test info action", () {
-    final action = router.route(chatInfo, telegram, "/info");
+    final action = router.route(messageInfo, telegram, "/info");
 
     expect(action, const TypeMatcher<InfoAction>());
   });
 
   test("test help action", () {
-    final action = router.route(chatInfo, telegram, "/help");
+    final action = router.route(messageInfo, telegram, "/help");
 
     expect(action, const TypeMatcher<HelpAction>());
   });
 
   test("test new cards action", () {
-    final action = router.route(chatInfo, telegram, "/cards");
+    final action = router.route(messageInfo, telegram, "/cards");
 
     expect(action, const TypeMatcher<CardsAction>());
   });
 
   test("test receive cards action", () {
-    final action = router.route(chatInfo, telegram, "/cardsreceive");
+    final action = router.route(messageInfo, telegram, "/cardsreceive");
 
     expect(action, const TypeMatcher<ReceiveCardsAction>());
   });
 
   test("test wrong action", () {
-    expect(() => router.route(chatInfo, telegram, "wrong"), throwsException);
+    expect(() => router.route(messageInfo, telegram, "wrong"), throwsException);
   });
 }
 

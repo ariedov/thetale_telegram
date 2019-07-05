@@ -12,14 +12,14 @@ import 'package:thetale_api/thetale_api.dart';
 
 void main() {
   UserManagerMock userManager;
-  ChatInfo chatInfo;
+  MessageInfo messageInfo;
   TaleApiMock taleMock;
   ActionRouterMock routerMock;
   TelegramWrapper telegram;
   Room room;
 
   setUp(() {
-    chatInfo = ChatInfo(0);
+    messageInfo = MessageInfo(chatId: 0, messageId: 0);
     userManager = UserManagerMock();
     taleMock = TaleApiMock();
     routerMock = ActionRouterMock();
@@ -31,9 +31,9 @@ void main() {
   test("test single user action", () async {
     final update = createMessageWithAction("/start");
     final action = SingleUserTelegramAction();
-    when(routerMock.route(chatInfo, telegram, "/start")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/start")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.apply(account: null));
   });
@@ -58,9 +58,9 @@ void main() {
     final update = createMessageWithAction("/help");
     final action = MultiUserTelegramAction();
 
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.performEmptyAction());
   });
@@ -72,9 +72,9 @@ void main() {
 
     when(userManager.readUserSession())
         .thenAnswer((_) => Future(() => [SessionInfo("session", "info")]));
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.apply(account: "session"));
   });
@@ -88,9 +88,9 @@ void main() {
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.performChooserAction(any));
     verify(taleMock.setStorage(any));
@@ -106,9 +106,9 @@ void main() {
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.apply(account: "session"));
   });
@@ -123,9 +123,9 @@ void main() {
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.apply(account: "second"));
   });
@@ -138,9 +138,9 @@ void main() {
         .thenAnswer((_) => Future(() => [SessionInfo("session", "info")]));
     when(taleMock.gameInfo()).thenAnswer(
         (_) => Future(() => createGameInfoWithCharacterName("character")));
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, message);
+    await room.processMessage(messageInfo, telegram, message);
 
     verify(action.apply(account: "session"));
   });
@@ -149,9 +149,9 @@ void main() {
     final message = createMessageWithAction("/help session");
     final action = MultiUserTelegramAction();
 
-    when(routerMock.route(chatInfo, telegram, "/help")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/help")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, message);
+    await room.processMessage(messageInfo, telegram, message);
 
     verify(action.performEmptyAction());
   });
@@ -162,9 +162,9 @@ void main() {
 
     when(userManager.readUserSession()).thenAnswer((_) => Future(
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
-    when(routerMock.route(chatInfo, telegram, "/confirm")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/confirm")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, message);
+    await room.processMessage(messageInfo, telegram, message);
 
     verify(action.apply(account: "session"));
   });
@@ -175,9 +175,9 @@ void main() {
 
     when(userManager.readUserSession()).thenAnswer((_) => Future(
         () => [SessionInfo("session", "info"), SessionInfo("second", "info")]));
-    when(routerMock.route(chatInfo, telegram, "/confirm")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/confirm")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.apply(account: "second"));
   });
@@ -186,9 +186,9 @@ void main() {
     final update = createMessageWithAction("/confirm session");
     final action = SingleUserTelegramAction();
 
-    when(routerMock.route(chatInfo, telegram, "/confirm")).thenReturn(action);
+    when(routerMock.route(messageInfo, telegram, "/confirm")).thenReturn(action);
 
-    await room.processMessage(chatInfo, telegram, update);
+    await room.processMessage(messageInfo, telegram, update);
 
     verify(action.apply(account: null));
   });

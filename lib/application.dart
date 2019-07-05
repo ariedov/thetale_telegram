@@ -25,14 +25,14 @@ class Application {
 
     teledart.onCommand().listen((message) {
       final room = roomManager.getRoom(message.chat.id);
-      final info = ChatInfo(message.chat.id);
+      final info = MessageInfo(chatId: message.chat.id, messageId: message.message_id);
       room.processMessage(info, wrapper, message);
       
     });
 
     teledart.onCallbackQuery().listen((query) {
       final room = roomManager.getRoom(query.message.chat.id);
-      final info = ChatInfo(query.message.chat.id);
+      final info = MessageInfo(chatId: query.message.chat.id, messageId: query.message.message_id);
       room.processCallbackQuery(info, wrapper, query);
     });
   }

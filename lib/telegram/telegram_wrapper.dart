@@ -8,13 +8,31 @@ class TelegramWrapper {
 
   final TeleDart teleDart;
 
-  Future<Message> sendMessage(ChatInfo chatInfo, String text, {ReplyMarkup replyMarkup}) {
-    return teleDart.telegram.sendMessage(chatInfo.chatId, text, reply_markup: replyMarkup, parse_mode: "Markdown");
+  Future<Message> sendMessage(int chatId, String text,
+      {ReplyMarkup replyMarkup}) {
+    return teleDart.telegram.sendMessage(chatId, text,
+        reply_markup: replyMarkup, parse_mode: "Markdown");
+  }
+
+  Future<Message> updateMessageReplyMarkup(
+      MessageInfo messageInfo, InlineKeyboardMarkup replyMarkup) {
+    return teleDart.telegram.editMessageReplyMarkup(
+        chat_id: messageInfo.chatId,
+        message_id: messageInfo.messageId,
+        reply_markup: replyMarkup);
+  }
+
+  Future<Message> updateMessageText(
+      MessageInfo messageInfo, String messageText) {
+    return teleDart.telegram.editMessageText(messageText,
+        chat_id: messageInfo.chatId, message_id: messageInfo.messageId);
   }
 }
 
-class ChatInfo {
-  ChatInfo(this.chatId);
+class MessageInfo {
+  MessageInfo({this.chatId, this.messageId});
 
   final int chatId;
+
+  final int messageId;
 }

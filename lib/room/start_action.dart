@@ -7,9 +7,9 @@ import 'package:teledart/model.dart';
 import 'package:thetale_api/thetale_api.dart';
 
 class StartAction extends TelegramAction {
-  StartAction(this._userManager, ChatInfo chatInfo, TaleApiWrapper taleApi,
+  StartAction(this._userManager, MessageInfo messageInfo, TaleApiWrapper taleApi,
       TelegramWrapper telegramApi)
-      : super(chatInfo, taleApi, telegramApi);
+      : super(messageInfo, taleApi, telegramApi);
 
   static const String name = "/start";
 
