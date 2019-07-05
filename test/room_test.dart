@@ -92,7 +92,7 @@ void main() {
 
     await room.processMessage(messageInfo, telegram, update);
 
-    verify(action.performChooserAction(any));
+    verify(action.performChooserAction({"session": "character", "second": "character"}));
     verify(taleMock.setStorage(any));
   });
 

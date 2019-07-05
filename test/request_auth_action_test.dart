@@ -23,7 +23,7 @@ void main() {
     userManager = UserManagerMock();
     taleApi = TaleApiMock();
 
-    taleApiWrapper = TaleApiWrapper(taleApi, "");
+    taleApiWrapper = TaleApiWrapper(taleApi, "apiUrl");
     telegramApi = TelegramApiMock();
 
     action = RequestAuthAction(userManager, messageInfo, taleApiWrapper, telegramApi);
@@ -49,7 +49,12 @@ void main() {
 
     verify(userManager.clearAll());
     verify(taleApi.auth(
-        headers: anyNamed("headers"),
+        headers: {
+          "Referer": "apiUrl",
+          "X-CSRFToken": "csrfToken",
+          "Cookie":
+              "csrftoken=csrfToken; sessionid=sessionId"
+        },
         applicationName: applicationName,
         applicationInfo: applicationInfo,
         applicationDescription: applicationDescription));

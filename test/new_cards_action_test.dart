@@ -26,7 +26,7 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(0, any, replyMarkup: null));
+    verify(telegramApi.sendMessage(0, "Новых карт нет.", replyMarkup: null));
   });
 
   test("test available new cards", () async {
@@ -34,8 +34,8 @@ void main() {
 
     await action.performAction();
 
-    verify(telegramApi.sendMessage(0, any, replyMarkup: anyNamed("replyMarkup")));
-    verifyNever(telegramApi.sendMessage(0, any, replyMarkup: null));
+    verify(telegramApi.sendMessage(0, "Количество доступных карт: *1*", replyMarkup: anyNamed("replyMarkup")));
+    verifyNever(telegramApi.sendMessage(0, "Новых карт нет.", replyMarkup: null));
   });
 }
 

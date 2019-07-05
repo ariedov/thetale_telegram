@@ -20,7 +20,7 @@ void main() {
     taleApi = TaleApiMock();
 
     messageInfo = MessageInfo(chatId: 0, messageId: 0);
-    taleApiWrapper = TaleApiWrapper(taleApi, "");
+    taleApiWrapper = TaleApiWrapper(taleApi, "apiUrl");
     telegram = TelegramApiMock();
 
     action = AddAccountAction(messageInfo, taleApiWrapper, telegram);
@@ -45,13 +45,17 @@ void main() {
     await action.performAction();
 
     verify(taleApi.auth(
-        headers: anyNamed("headers"),
+        headers: {
+          "Referer": "apiUrl",
+          "X-CSRFToken": "csrfToken",
+          "Cookie":
+              "csrftoken=csrfToken; sessionid=sessionId"
+        },
         applicationName: applicationName,
         applicationInfo: applicationInfo,
         applicationDescription: applicationDescription));
     expect(await storage.readSession(), sessionInfo);
   });
-
 }
 
 class TaleApiMock extends Mock implements TaleApi {}
