@@ -44,6 +44,24 @@ abstract class TelegramAction {
     }
     return null;
   }
+
+  Future<Message> tryUpdateMessageMarkup(InlineKeyboardMarkup replyMarkup) {
+    try {
+      return telegram.updateMessageReplyMarkup(_messageInfo, replyMarkup);
+    } catch (e) {
+      print("Failed to update message reply markup");
+    }
+    return null;
+  }
+
+  Future<Message> tryUpdateMessageText(String messageText) {
+    try {
+      return telegram.updateMessageText(_messageInfo, messageText);
+    } catch (e) {
+      print("Failed to update message text");
+    }
+    return null;
+  }
 }
 
 abstract class MultiUserAction extends TelegramAction {

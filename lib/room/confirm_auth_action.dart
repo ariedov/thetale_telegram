@@ -17,13 +17,14 @@ class ConfirmAuthAction extends TelegramAction {
     final status = await taleApi.authStatus();
 
     if (status.data.isAccepted) {
+      await tryUpdateMessageMarkup(InlineKeyboardMarkup());
+      await tryUpdateMessageText("Авторизация прошла успешно!");
+
       await trySendMessage("Ну привет, ${status.data.accountName}.",
           replyMarkup: ReplyKeyboardMarkup(keyboard: [
             [KeyboardButton(text: "/help")],
             [KeyboardButton(text: "/info")],
           ]));
-
-      // TODO: remove "/confirm" button from previous message
 
       final gameInfo = await taleApi.gameInfo();
       await trySendMessage(

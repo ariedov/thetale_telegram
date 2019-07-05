@@ -10,6 +10,8 @@ import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:thetale_api/thetale_api.dart';
 
+import 'utils.dart';
+
 void main() {
   UserManagerMock userManager;
   MessageInfo messageInfo;
@@ -201,33 +203,6 @@ Message createMessageWithAction(String action) {
           is_bot: false),
       chat: Chat(id: 0, first_name: "firstName", last_name: "lastName", username: "userName", type: "private"),
       text: action);
-}
-
-GameInfo createGameInfoWithCharacterName(String character) {
-//  info.account?.hero?.base?.name
-  return GameInfo(
-      "",
-      null,
-      null,
-      null,
-      Account(
-          null,
-          null,
-          null,
-          true,
-          false,
-          Hero(
-              null,
-              null,
-              Base(null, null, null, character, null, null, null, null, null,
-                  null, true),
-              null,
-              null,
-              null,
-              null),
-          false,
-          100),
-      null);
 }
 
 class SingleUserTelegramAction extends Mock implements TelegramAction {}
