@@ -18,17 +18,15 @@ class ConfirmAuthAction extends TelegramAction {
 
     if (status.data.isAccepted) {
       await tryUpdateMessageMarkup(InlineKeyboardMarkup());
-      await tryUpdateMessageText("Авторизация прошла успешно!");
+      await tryUpdateMessageText("Ну привет, ${status.data.accountName}.");
 
-      await trySendMessage("Ну привет, ${status.data.accountName}.",
+      final gameInfo = await taleApi.gameInfo();
+      await trySendMessage(
+          """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}""",
           replyMarkup: ReplyKeyboardMarkup(keyboard: [
             [KeyboardButton(text: "/help")],
             [KeyboardButton(text: "/info")],
           ]));
-
-      final gameInfo = await taleApi.gameInfo();
-      await trySendMessage(
-          """${gameInfo.account.hero.base.name} уже заждался.\n${generateAccountInfo(gameInfo.account)}""");
     } else {
       await trySendMessage("Тебе стоит попытаться еще раз.");
     }

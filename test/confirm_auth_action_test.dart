@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:epictale_telegram/room/confirm_auth_action.dart';
 import 'package:epictale_telegram/telegram/telegram_wrapper.dart';
 import 'package:mockito/mockito.dart';
-import 'package:teledart/model.dart';
 import 'package:test/test.dart';
 import 'package:thetale_api/thetale_api.dart';
 
@@ -30,7 +29,7 @@ void main() {
     await action.performAction();
 
     verify(telegramWrapper.updateMessageReplyMarkup(messageInfo, any));
-    verify(telegramWrapper.updateMessageText(messageInfo, "Авторизация прошла успешно!"));
+    verify(telegramWrapper.updateMessageText(messageInfo, "Ну привет, accountName."));
   });
 
   test("test confirmation unsuccsessful", () async {
